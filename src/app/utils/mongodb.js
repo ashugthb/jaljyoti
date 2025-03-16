@@ -14,10 +14,7 @@ export const openConnection = async (url) => {
 // Connects to the MongoDB using the NEXT_PUBLIC_BASE_MONGO_URL environment variable
 export const connect = async () => {
     try {
-        const conn = await mongoose.connect(process.env.MONGODB_URI, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true
-        });
+        const conn = await mongoose.connect(process.env.MONGODB_URI);
         return conn;
     } catch (error) {
         console.error('Error in connect:', error);
