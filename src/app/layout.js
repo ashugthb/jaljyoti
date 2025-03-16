@@ -1,4 +1,5 @@
 // app/layout.js
+
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import MuiProvider from "./MuiProvider"; // adjust the path if necessary

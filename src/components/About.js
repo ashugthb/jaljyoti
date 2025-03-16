@@ -15,9 +15,9 @@ export default function About() {
     }, []);
 
     return (
-        <Container sx={{ py: { xs: 4, md: 7 } }}>
+        <Container sx={{ py: { xs: 3, md: 5 }, display: 'flex', justifyContent: 'center', alignItems: "center", flexDirection: 'column' }}>
             <Typography
-                variant="h3"
+                variant="h4"
                 align="center"
                 sx={{
                     fontWeight: 700,
@@ -29,14 +29,14 @@ export default function About() {
                     animation: `${fadeIn} 1s ease-out`
                 }}
             >
-                Our Presentation
+                About Jaljyoti
             </Typography>
             <Box
                 sx={{
                     position: 'relative',
                     overflow: 'hidden',
-                    width: '100%',
-                    height: { xs: '380px', md: '430px' },
+                    width: { xs: '380px', md: '700px' },
+                    height: { xs: '380px', md: '480px' },
                     borderRadius: 2,
                     boxShadow: 3,
                     animation: `${fadeIn} 1s ease-out`,

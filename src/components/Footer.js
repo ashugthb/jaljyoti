@@ -71,8 +71,6 @@ export default function Footer() {
         const token = localStorage.getItem('token');
         if (token) {
             setIsAdminLoggedIn(true);
-        } else {
-            setIsAdminLoggedIn(false);
         }
     }, []);
 

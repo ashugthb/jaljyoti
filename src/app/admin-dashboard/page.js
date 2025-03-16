@@ -215,7 +215,7 @@ export default function AdminDashboard() {
                                 <TableCell sx={{
                                     fontSize: isMobile ? '0.875rem' : '1rem',
                                     py: 1.5
-                                }}>
+                                }} suppressHydrationWarning>
                                     {new Date(contact.createdAt).toLocaleString()}
                                 </TableCell>
                             </TableRow>

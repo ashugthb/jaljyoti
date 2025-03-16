@@ -82,21 +82,21 @@ export default function Home() {
         navItems={navItems}
         scrollToSection={scrollToSection}
       />
-      <section id="home" ref={homeRef}>
+      <Box component="section" id="home" ref={homeRef}>
         <Hero isMobile={isMobile} />
-      </section>
-      <section id="about" ref={aboutRef}>
+      </Box>
+      <Box component="section" id="about" ref={aboutRef}>
         <About />
-      </section>
-      <section id="water-usage" ref={waterUsageRef}>
+      </Box>
+      <Box component="section" id="water-usage" ref={waterUsageRef}>
         <WaterUsage />
-      </section>
-      <section id="team" ref={teamRef}>
+      </Box>
+      <Box component="section" id="team" ref={teamRef}>
         <Team isMobile={isMobile} />
-      </section>
-      <section id="contact" ref={contactRef}>
+      </Box>
+      <Box component="section" id="contact" ref={contactRef}>
         <Contact />
-      </section>
+      </Box>
       <Footer />
     </Box>
   );
