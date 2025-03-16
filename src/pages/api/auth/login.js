@@ -9,6 +9,7 @@ export default async function handler(req, res) {
 
         try {
             // Connect to the database using the provided connect function
+            console.log("before connect")
             await connect();
             console.log(username, password)
 

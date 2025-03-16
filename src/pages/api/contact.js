@@ -5,7 +5,9 @@ export default async function handler(req, res) {
     if (req.method === 'POST') {
         try {
             // Connect to the database
+            console.log("before connect");
             await connect();
+            console.log("after connect");
 
             const { name, email, phone, subject, message } = req.body;
 
@@ -15,7 +17,9 @@ export default async function handler(req, res) {
             }
 
             // Create a new contact document
+            console.log("before create contact");
             const newContact = new Contact({ name, email, phone, subject, message });
+            console.log("after create contact", newContact);
 
             // Save the document to the database
             await newContact.save();
