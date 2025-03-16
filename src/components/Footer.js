@@ -15,6 +15,9 @@ import {
     useMediaQuery,
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
+import PhoneIcon from '@mui/icons-material/Phone';
+import EmailIcon from '@mui/icons-material/Email';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
 
 export default function Footer() {
     const theme = useTheme();
@@ -29,6 +32,13 @@ export default function Footer() {
         { name: "Our Team", href: "#team" },
         { name: "Contact", href: "#contact" },
     ];
+
+    // Contact details
+    const contactDetails = {
+        phone: "+1 (555) 123-4567",
+        email: "info@jaljyoti.com",
+        address: "123 Main Street, City, Country",
+    };
 
     const handleLinkClick = (e, href) => {
         e.preventDefault();
@@ -103,7 +113,7 @@ export default function Footer() {
                             ))}
                         </Grid>
                     </Grid>
-                    <Grid item xs={12} md={4} sx={{ textAlign: { xs: "center", md: "right" }, pr: { md: 0 } }}>
+                    <Grid item xs={12} md={4} sx={{ textAlign: { xs: "center", md: "right" } }}>
                         <Button
                             variant="outlined"
                             onClick={isAdminLoggedIn ? () => window.location.href = '/admin-dashboard' : () => setOpenAdminLogin(true)}
@@ -124,6 +134,22 @@ export default function Footer() {
                         </Button>
                     </Grid>
                 </Grid>
+
+                {/* New contact details section */}
+                <Box sx={{ mt: 4, borderTop: "1px solid rgba(255, 255, 255, 0.2)", pt: 3 }}>
+                    <Grid container spacing={1} alignItems="center" justifyContent="flex-start">
+                        <Grid item xs={12} sm={4} sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            <PhoneIcon sx={{ mr: 1, color: "#FF9800" }} />
+                            <Typography variant="body2">{contactDetails.phone}</Typography>
+                        </Grid>
+                        <Grid item xs={12} sm={4} sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            <EmailIcon sx={{ mr: 1, color: "#FF9800" }} />
+                            <Typography variant="body2">{contactDetails.email}</Typography>
+                        </Grid>
+
+                    </Grid>
+                </Box>
+
                 <Box sx={{ mt: 2, textAlign: "right" }}>
                     <Typography variant="body2" sx={{ opacity: 0.8, fontWeight: 400 }}>
                         © {new Date().getFullYear()} JalJyoti - All rights reserved.
