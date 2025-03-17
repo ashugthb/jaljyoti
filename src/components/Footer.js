@@ -35,9 +35,9 @@ export default function Footer() {
 
     // Contact details
     const contactDetails = {
-        phone: "+1 (555) 123-4567",
-        email: "info@jaljyoti.com",
-        address: "123 Main Street, City, Country",
+        phone: "+91 8303277418",
+        email: "jaljyotiprosense@gmail.com",
+
     };
 
     const handleLinkClick = (e, href) => {
@@ -137,12 +137,12 @@ export default function Footer() {
 
                 {/* New contact details section */}
                 <Box sx={{ mt: 4, borderTop: "1px solid rgba(255, 255, 255, 0.2)", pt: 3 }}>
-                    <Grid container spacing={1} alignItems="center" justifyContent="flex-start">
-                        <Grid item xs={12} sm={4} sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Grid container alignItems="center" justifyContent="flex-start">
+                        <Grid item xs={12} sm={4} md={3} sx={{ display: "flex", alignItems: "center", justifyContent: "left" }}>
                             <PhoneIcon sx={{ mr: 1, color: "#FF9800" }} />
                             <Typography variant="body2">{contactDetails.phone}</Typography>
                         </Grid>
-                        <Grid item xs={12} sm={4} sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <Grid item xs={12} sm={4} md={3} sx={{ display: "flex", alignItems: "center", justifyContent: "left" }}>
                             <EmailIcon sx={{ mr: 1, color: "#FF9800" }} />
                             <Typography variant="body2">{contactDetails.email}</Typography>
                         </Grid>

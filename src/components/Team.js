@@ -29,7 +29,7 @@ const teamMembers = [
 
 export default function Team({ isMobile }) {
     return (
-        <Box sx={{ py: 6, px: { xs: 2, md: 4 }, backgroundColor: "#f5f5f5" }}>
+        <Box sx={{ py: 6, px: { xs: 2, md: 4 }, background: 'linear-gradient(135deg, #B2DFDB, #C8E6C9)', }}>
             <Typography
                 variant="h3"
                 align="center"

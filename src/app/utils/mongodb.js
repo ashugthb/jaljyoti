@@ -1,30 +1,12 @@
 // utils/mongodb.js
 import mongoose from 'mongoose';
 
-if (!process.env.MONGODB_URI) {
-    throw new Error(
-        'Please define the MONGODB_URI environment variable inside .env.local'
-    );
-}
 
-let cached = global.mongoose;
-
-if (!cached) {
-    cached = global.mongoose = { conn: null, promise: null };
-}
-
-export async function connect() {
-    console.log("connnection")
-    if (cached.conn) {
-        return cached.conn;
+export const connect = async () => {
+    try {
+        await mongoose.connect(process.env.MONGODB_URI)
+    } catch (error) {
+        console.error(error)
     }
 
-    if (!cached.promise) {
-        cached.promise = mongoose.connect(process.env.MONGODB_URI)
-            .then(mongooseInstance => {
-                return mongooseInstance;
-            });
-    }
-    cached.conn = await cached.promise;
-    return cached.conn;
 }

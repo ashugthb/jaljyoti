@@ -21,7 +21,7 @@ export default function Hero({ isMobile }) {
                 backgroundImage: 'url(/bg-1.webp)',
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
-                py: isMobile ? 8 : 15,
+                py: isMobile ? 8 : 20,
                 textAlign: 'center',
                 overflow: 'hidden',
             }}

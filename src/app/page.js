@@ -8,6 +8,7 @@ import WaterUsage from "../components/WaterUsage";
 import Team from "../components/Team";
 import Contact from "../components/Contact";
 import Footer from "../components/Footer";
+import ImageGallery from "@/components/Gallary";
 
 export default function Home() {
   // Use noSsr option to avoid mismatches during hydration.
@@ -87,6 +88,9 @@ export default function Home() {
       </Box>
       <Box component="section" id="about" ref={aboutRef}>
         <About />
+      </Box>
+      <Box component="section" id="gallary" >
+        <ImageGallery />
       </Box>
       <Box component="section" id="water-usage" ref={waterUsageRef}>
         <WaterUsage />

@@ -87,11 +87,11 @@ export default function Contact() {
                         fontWeight: 600,
                         px: 4,
                         py: 1.5,
-                        backgroundColor: "#1565C0",
+                        backgroundColor: "#004D40", // Dark Teal
                         transition: "transform 0.3s ease, background-color 0.3s ease",
                         "&:hover": {
                             transform: "scale(1.03)",
-                            backgroundColor: "#0D47A1",
+                            backgroundColor: "#00695C", // Lighter dark teal
                         },
                     }}
                 >
@@ -109,7 +109,8 @@ export default function Contact() {
                     sx: {
                         borderRadius: 2,
                         p: 2,
-                        boxShadow: "0px 4px 16px rgba(0,0,0,0.2)",
+                        boxShadow: "0px 4px 16px rgba(0,0,0,0.3)",
+                        backgroundColor: "#ECEFF1", // Light background for contrast
                     },
                 }}
             >
@@ -118,9 +119,10 @@ export default function Contact() {
                         textAlign: "center",
                         fontWeight: "bold",
                         fontSize: "1.6rem",
-                        borderBottom: "2px solid #1565C0",
+                        borderBottom: "2px solid #004D40", // Dark Teal accent
                         pb: 1,
                         mb: 2,
+                        color: "#004D40",
                     }}
                 >
                     Contact Us
@@ -207,10 +209,10 @@ export default function Contact() {
                         onClick={handleClose}
                         variant="outlined"
                         sx={{
-                            borderColor: "#1565C0",
-                            color: "#1565C0",
+                            borderColor: "#004D40",
+                            color: "#004D40",
                             transition: "transform 0.3s ease, background-color 0.3s ease",
-                            "&:hover": { backgroundColor: "#1565C0", color: "#fff" },
+                            "&:hover": { backgroundColor: "#004D40", color: "#fff" },
                             px: 3,
                             py: 1,
                         }}
@@ -223,10 +225,10 @@ export default function Contact() {
                         variant="contained"
                         disabled={loading}
                         sx={{
-                            backgroundColor: "#1565C0",
+                            backgroundColor: "#004D40",
                             color: "#fff",
                             transition: "transform 0.3s ease, background-color 0.3s ease",
-                            "&:hover": { backgroundColor: "#0D47A1" },
+                            "&:hover": { backgroundColor: "#00695C" },
                             px: 3,
                             py: 1,
                         }}

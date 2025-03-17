@@ -15,48 +15,107 @@ export default function About() {
     }, []);
 
     return (
-        <Container sx={{ py: { xs: 3, md: 5 }, display: 'flex', justifyContent: 'center', alignItems: "center", flexDirection: 'column' }}>
+        <Container
+            sx={{
+                py: { xs: 3, md: 5 },
+                px: { xs: 2, md: 4 },
+                mx: 'auto',
+                maxWidth: { xs: '80%', lg: '1550px' },
+                background: 'linear-gradient(135deg, #F1F8E9, #E0F2F1)', // gentle light green/teal gradient
+                borderRadius: 2,
+                boxShadow: '0px 4px 12px rgba(0,0,0,0.1)'
+            }}
+        >
             <Typography
                 variant="h4"
-                align="center"
+                align="left"
                 sx={{
+                    fontFamily: '"Montserrat", sans-serif',
                     fontWeight: 700,
-                    mb: 2,
-                    color: '#00BCD4',
-                    borderBottom: '2px solid #00BCD4',
-                    display: 'inline-block',
-                    pb: 1,
+                    mb: 4,
+                    color: '#00796B', // dark teal for heading
+                    textShadow: '1px 1px 2px rgba(0,0,0,0.2)',
                     animation: `${fadeIn} 1s ease-out`
                 }}
             >
                 About Jaljyoti
             </Typography>
+
             <Box
                 sx={{
-                    position: 'relative',
-                    overflow: 'hidden',
-                    width: { xs: '380px', md: '700px' },
-                    height: { xs: '380px', md: '480px' },
-                    borderRadius: 2,
-                    boxShadow: 3,
-                    animation: `${fadeIn} 1s ease-out`,
-                    mb: 2
+                    display: 'flex',
+                    flexDirection: { xs: 'column', md: 'row' },
+                    gap: { xs: 2, md: 4 },
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    mx: 3
                 }}
             >
-                <iframe
-                    src={baseUrl}
-                    style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        width: '100%',
-                        height: '100%',
-                        border: 'none'
+                {/* Google Slides Container */}
+                <Box
+                    sx={{
+                        position: 'relative',
+                        overflow: 'hidden',
+                        width: { xs: '100%', md: '45%' },
+                        height: { xs: '300px', md: '380px' },
+                        borderRadius: 2,
+                        boxShadow: '0px 4px 8px rgba(0,0,0,0.2)',
+                        background: 'linear-gradient(135deg, #E0F7FA, #B2DFDB)',
+                        animation: `${fadeIn} 1s ease-out`,
+                        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                        '&:hover': {
+                            transform: 'scale(1.04)',
+                            boxShadow: '0px 6px 12px rgba(0,0,0,0.3)'
+                        },
+                        ml: { md: '-20px' }
                     }}
-                    allowFullScreen
-                    title="Google Slides Presentation"
-                    loading="lazy" // Lazy load the iframe for better performance
-                />
+                >
+                    <iframe
+                        src={baseUrl}
+                        style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            height: '100%',
+                            border: 'none'
+                        }}
+                        allowFullScreen
+                        title="Google Slides Presentation"
+                        loading="lazy"
+                    />
+                </Box>
+
+                {/* Video Container */}
+                <Box
+                    sx={{
+                        position: 'relative',
+                        overflow: 'hidden',
+                        width: { xs: '100%', md: '55%' },
+                        aspectRatio: '16/9',
+                        borderRadius: 2,
+                        boxShadow: '0px 4px 8px rgba(0,0,0,0.2)',
+                        animation: `${fadeIn} 1s ease-out`,
+                        border: '2px solid',
+                        borderImage: 'linear-gradient(45deg, #00BCD4, #43A047) 1',
+                        backgroundColor: '#ECEFF1',
+                        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                        '&:hover': {
+                            transform: 'scale(1.04)',
+                            boxShadow: '0px 6px 12px rgba(0,0,0,0.3)'
+                        }
+                    }}
+                >
+                    <video
+                        src="/video.mp4"
+                        controls
+                        style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover'
+                        }}
+                    />
+                </Box>
             </Box>
         </Container>
     );
