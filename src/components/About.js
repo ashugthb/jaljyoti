@@ -20,10 +20,10 @@ export default function About() {
                 py: { xs: 3, md: 5 },
                 px: { xs: 2, md: 4 },
                 mx: 'auto',
-                maxWidth: { xs: '80%', lg: '1550px' },
-                background: 'linear-gradient(135deg, #F1F8E9, #E0F2F1)', // gentle light green/teal gradient
+                maxWidth: { xs: '100%', lg: '1550px' }, // full width on mobile
+                background: 'linear-gradient(135deg, #FFFFFF, #E0F2F1)',// gentle light green/teal gradient
                 borderRadius: 2,
-                boxShadow: '0px 4px 12px rgba(0,0,0,0.1)'
+                boxShadow: '0px 4px 12px rgba(0,0,0,0.1)',
             }}
         >
             <Typography
@@ -32,10 +32,10 @@ export default function About() {
                 sx={{
                     fontFamily: '"Montserrat", sans-serif',
                     fontWeight: 700,
-                    mb: 4,
+                    mb: { xs: 4, md: 6 },
                     color: '#00796B', // dark teal for heading
                     textShadow: '1px 1px 2px rgba(0,0,0,0.2)',
-                    animation: `${fadeIn} 1s ease-out`
+                    animation: `${fadeIn} 1s ease-out`,
                 }}
             >
                 About Jaljyoti
@@ -48,7 +48,7 @@ export default function About() {
                     gap: { xs: 2, md: 4 },
                     justifyContent: 'center',
                     alignItems: 'center',
-                    mx: 3
+                    mx: { xs: 0, md: 3 },
                 }}
             >
                 {/* Google Slides Container */}
@@ -65,9 +65,9 @@ export default function About() {
                         transition: 'transform 0.3s ease, box-shadow 0.3s ease',
                         '&:hover': {
                             transform: 'scale(1.04)',
-                            boxShadow: '0px 6px 12px rgba(0,0,0,0.3)'
+                            boxShadow: '0px 6px 12px rgba(0,0,0,0.3)',
                         },
-                        ml: { md: '-20px' }
+                        ml: { md: '-20px' },
                     }}
                 >
                     <iframe
@@ -78,7 +78,7 @@ export default function About() {
                             left: 0,
                             width: '100%',
                             height: '100%',
-                            border: 'none'
+                            border: 'none',
                         }}
                         allowFullScreen
                         title="Google Slides Presentation"
@@ -102,8 +102,8 @@ export default function About() {
                         transition: 'transform 0.3s ease, box-shadow 0.3s ease',
                         '&:hover': {
                             transform: 'scale(1.04)',
-                            boxShadow: '0px 6px 12px rgba(0,0,0,0.3)'
-                        }
+                            boxShadow: '0px 6px 12px rgba(0,0,0,0.3)',
+                        },
                     }}
                 >
                     <video
@@ -112,7 +112,7 @@ export default function About() {
                         style={{
                             width: '100%',
                             height: '100%',
-                            objectFit: 'cover'
+                            objectFit: 'cover',
                         }}
                     />
                 </Box>

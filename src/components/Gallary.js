@@ -1,23 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, IconButton } from '@mui/material';
+import { Box, Typography, IconButton, useMediaQuery, useTheme } from '@mui/material';
 import { keyframes } from '@mui/system';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 
 export default function GallerySlider() {
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
     // Array of image URLs – update with your own paths
     const images = [
         '/img1.jpg',
+        '/bg2.webp',
+        '/bg-4.webp',
+        '/bg3.webp',
+        '/bg4.webp',
         '/img1.jpg',
-        '/img1.jpg',
-        '/img1.jpg',
-        '/img1.jpg',
-        '/logo.jpg',
-        '/logo.jpg',
-        '/images/gallery8.jpg',
+        '/bh-3.webp',
+        '/bg-2.webp',
     ];
 
-    const imagesPerSlide = 4;
+    const imagesPerSlide = isMobile ? 1 : 4;
     const totalSlides = Math.ceil(images.length / imagesPerSlide);
     const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -29,13 +32,13 @@ export default function GallerySlider() {
         return () => clearInterval(timer);
     }, [totalSlides]);
 
-    // Split images into slides
+    // Split images into slides based on imagesPerSlide
     const slides = [];
     for (let i = 0; i < totalSlides; i++) {
         slides.push(images.slice(i * imagesPerSlide, i * imagesPerSlide + imagesPerSlide));
     }
 
-    // Navigation handlers (optional for desktop)
+    // Navigation handlers
     const handlePrev = () => {
         setCurrentSlide((prev) => (prev - 1 + totalSlides) % totalSlides);
     };
@@ -50,8 +53,17 @@ export default function GallerySlider() {
   `;
 
     return (
-        <Box sx={{ maxWidth: { xs: '100%', lg: '1550px' }, mx: 'auto', py: 12, px: 2, position: 'relative', background: 'linear-gradient(135deg, #F1F8E9, #E0F2F1)' }}>
-            {/* Left-aligned heading with decorative accent */}
+        <Box
+            sx={{
+                maxWidth: { xs: '100%', lg: '1550px' },
+                mx: 'auto',
+                py: 12,
+                px: 2,
+                position: 'relative',
+                background: 'linear-gradient(135deg, #FFFFFF, #E0F2F1)',
+            }}
+        >
+            {/* Heading */}
             <Box sx={{ mb: 4 }}>
                 <Typography
                     variant="h4"
@@ -59,13 +71,13 @@ export default function GallerySlider() {
                     sx={{
                         fontFamily: 'Roboto, sans-serif',
                         fontWeight: 700,
-                        color: '#00796B', // dark teal
-                        textShadow: '1px 1px 3px rgba(0,0,0,0.2)',
+                        color: '#2C3E50',
+                        textShadow: '1px 1px 3px rgba(0,0,0,0.1)',
                     }}
                 >
                     Image Gallery
                 </Typography>
-                <Box sx={{ height: 4, width: 80, backgroundColor: '#00796B', mt: 1, borderRadius: 2 }} />
+                <Box sx={{ height: 4, width: 80, backgroundColor: '#2C3E50', mt: 1, borderRadius: 2 }} />
             </Box>
 
             {/* Gallery container */}
@@ -73,8 +85,8 @@ export default function GallerySlider() {
                 sx={{
                     overflow: 'hidden',
                     borderRadius: 2,
-                    boxShadow: '0px 4px 12px rgba(0,0,0,0.15)',
-                    background: 'linear-gradient(135deg, #E0F2F1, #B2DFDB)', // soft teal/mint gradient
+                    boxShadow: '0px 4px 12px rgba(0,0,0,0.1)',
+                    background: 'linear-gradient(135deg, #FFFFFF, #F7F9FC)',
                     p: 2,
                     position: 'relative',
                 }}
@@ -94,7 +106,7 @@ export default function GallerySlider() {
                             sx={{
                                 width: `${100 / totalSlides}%`,
                                 display: 'grid',
-                                gridTemplateColumns: 'repeat(4, 1fr)',
+                                gridTemplateColumns: `repeat(${isMobile ? 1 : 4}, 1fr)`,
                                 gap: 2,
                             }}
                         >
@@ -106,14 +118,14 @@ export default function GallerySlider() {
                                     alt={`Gallery Image ${slideIndex * imagesPerSlide + i + 1}`}
                                     sx={{
                                         width: '100%',
-                                        height: { xs: '150px', md: '200px' },
+                                        height: { xs: '200px', md: '250px' },
                                         objectFit: 'cover',
                                         borderRadius: 2,
-                                        boxShadow: '0px 4px 8px rgba(0,0,0,0.2)',
+                                        boxShadow: '0px 4px 8px rgba(0,0,0,0.1)',
                                         transition: 'transform 0.3s ease, box-shadow 0.3s ease',
                                         '&:hover': {
-                                            transform: 'scale(1.05)',
-                                            boxShadow: '0px 8px 16px rgba(0,0,0,0.3)',
+                                            transform: 'scale(1.03)',
+                                            boxShadow: '0px 6px 12px rgba(0,0,0,0.15)',
                                         },
                                     }}
                                 />
@@ -122,49 +134,51 @@ export default function GallerySlider() {
                     ))}
                 </Box>
 
-                {/* Navigation arrows for desktop */}
-                <Box
-                    sx={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: 16,
-                        transform: 'translateY(-50%)',
-                        zIndex: 2,
-                        display: { xs: 'none', md: 'flex' },
-                    }}
-                >
-                    <IconButton
-                        onClick={handlePrev}
-                        sx={{
-                            backgroundColor: 'rgba(0,0,0,0.3)',
-                            color: '#fff',
-                            '&:hover': { backgroundColor: 'rgba(0,0,0,0.5)' },
-                        }}
-                    >
-                        <ArrowBackIosNewIcon />
-                    </IconButton>
-                </Box>
-                <Box
-                    sx={{
-                        position: 'absolute',
-                        top: '50%',
-                        right: 16,
-                        transform: 'translateY(-50%)',
-                        zIndex: 2,
-                        display: { xs: 'none', md: 'flex' },
-                    }}
-                >
-                    <IconButton
-                        onClick={handleNext}
-                        sx={{
-                            backgroundColor: 'rgba(0,0,0,0.3)',
-                            color: '#fff',
-                            '&:hover': { backgroundColor: 'rgba(0,0,0,0.5)' },
-                        }}
-                    >
-                        <ArrowForwardIosIcon />
-                    </IconButton>
-                </Box>
+                {/* Navigation arrows for larger screens */}
+                {!isMobile && (
+                    <>
+                        <Box
+                            sx={{
+                                position: 'absolute',
+                                top: '50%',
+                                left: 16,
+                                transform: 'translateY(-50%)',
+                                zIndex: 2,
+                            }}
+                        >
+                            <IconButton
+                                onClick={handlePrev}
+                                sx={{
+                                    backgroundColor: 'rgba(0,0,0,0.2)',
+                                    color: '#fff',
+                                    '&:hover': { backgroundColor: 'rgba(0,0,0,0.4)' },
+                                }}
+                            >
+                                <ArrowBackIosNewIcon />
+                            </IconButton>
+                        </Box>
+                        <Box
+                            sx={{
+                                position: 'absolute',
+                                top: '50%',
+                                right: 16,
+                                transform: 'translateY(-50%)',
+                                zIndex: 2,
+                            }}
+                        >
+                            <IconButton
+                                onClick={handleNext}
+                                sx={{
+                                    backgroundColor: 'rgba(0,0,0,0.2)',
+                                    color: '#fff',
+                                    '&:hover': { backgroundColor: 'rgba(0,0,0,0.4)' },
+                                }}
+                            >
+                                <ArrowForwardIosIcon />
+                            </IconButton>
+                        </Box>
+                    </>
+                )}
             </Box>
         </Box>
     );

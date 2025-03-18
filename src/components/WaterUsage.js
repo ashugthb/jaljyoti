@@ -6,19 +6,19 @@ export default function WaterUsage() {
 
     const usageData = [
         {
-            image: '/logo.jpg',
+            image: '/bg2.webp',
             title: "Drinking Water",
             description:
                 "Current water quality is suitable for drinking after standard treatment. Boil water for 3 minutes to ensure safety."
         },
         {
-            image: '/logo.jpg',
+            image: '/bg3.webp',
             title: "Bathing & Hygiene",
             description:
                 "Safe for bathing and personal hygiene. Avoid ingestion and keep away from open wounds or cuts."
         },
         {
-            image: '/plant.jpg',
+            image: '/bg4.webp',
             title: "Agricultural Use",
             description:
                 "Suitable for irrigation of non-edible plants. Not recommended for leafy vegetables without treatment."
@@ -32,7 +32,7 @@ export default function WaterUsage() {
                 px: { xs: 2, md: 4 },
                 mx: 'auto',
                 maxWidth: { xs: '100%', lg: '1550px' },
-                background: 'linear-gradient(135deg, #B2DFDB, #C8E6C9)', // light teal/mint gradient
+                background: 'linear-gradient(135deg, #FFFFFF, #E0F2F1)',
                 borderRadius: 2,
             }}
         >
@@ -42,11 +42,10 @@ export default function WaterUsage() {
                 sx={{
                     fontWeight: 'bold',
                     fontFamily: '"Montserrat", sans-serif',
-                    background: 'linear-gradient(45deg, #00BCD4, #43A047)', // dark cyan and algae green gradient
+                    background: 'linear-gradient(45deg, #00695C, #00838F)',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
-                    textShadow: '1px 1px 3px rgba(0,0,0,0.3)',
-                    mb: { xs: 4, md: 6 },
+                    mb: { xs: 10, md: 8, }
                 }}
             >
                 Water Usage Information
@@ -63,28 +62,28 @@ export default function WaterUsage() {
                                 alignItems: 'center',
                                 textAlign: 'center',
                                 p: 3,
-                                boxShadow: '0px 4px 8px rgba(0,0,0,0.2)',
+                                boxShadow: '0px 4px 8px rgba(0,0,0,0.1)',
                                 borderRadius: 3,
                                 position: 'relative',
                                 overflow: 'visible',
-                                background: 'linear-gradient(135deg, #4DB6AC, #81C784)', // mix of teal and green
+                                background: '#fff',
                                 transition: 'transform 0.3s ease, box-shadow 0.3s ease',
                                 '&:hover': {
                                     transform: 'translateY(-5px)',
-                                    boxShadow: '0px 8px 16px rgba(0,0,0,0.3)',
+                                    boxShadow: '0px 8px 16px rgba(0,0,0,0.15)',
                                 },
                             }}
                         >
-                            {/* Floating square image */}
+                            {/* Floating image container without border */}
                             <Box
                                 sx={{
                                     position: 'absolute',
                                     top: '-80px',
                                     width: '170px',
                                     height: '170px',
-                                    borderRadius: 20, // slight rounding; set to 0 for a perfect square
-                                    background: 'linear-gradient(45deg, #00BCD4, #43A047)', // darker gradient for contrast
-                                    boxShadow: '0px 4px 8px rgba(0,0,0,0.3)',
+                                    borderRadius: 2,
+                                    backgroundColor: '#fff',
+                                    boxShadow: '0px 4px 8px rgba(0,0,0,0.1)',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
@@ -94,7 +93,17 @@ export default function WaterUsage() {
                                     component="img"
                                     src={usage.image}
                                     alt={usage.title}
-                                    sx={{ width: '170px', height: '170px', objectFit: 'cover', borderRadius: 20 }}
+                                    sx={{
+                                        width: '170px',
+                                        height: '170px',
+                                        objectFit: 'cover',
+                                        borderRadius: 2,
+                                        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                                        '&:hover': {
+                                            transform: 'scale(1.05)',
+                                            boxShadow: '0px 6px 12px rgba(0,0,0,0.2)',
+                                        }
+                                    }}
                                 />
                             </Box>
 
@@ -105,7 +114,7 @@ export default function WaterUsage() {
                                     sx={{
                                         fontWeight: 600,
                                         mb: 1,
-                                        color: '#ffffff',
+                                        color: '#333',
                                     }}
                                 >
                                     {usage.title}
@@ -113,7 +122,7 @@ export default function WaterUsage() {
                                 <Typography
                                     variant="body2"
                                     sx={{
-                                        color: '#E0F2F1', // light cyan/teal text for description
+                                        color: '#666',
                                         lineHeight: 1.9,
                                         px: 1,
                                     }}
@@ -122,12 +131,12 @@ export default function WaterUsage() {
                                 </Typography>
                             </CardContent>
 
-                            {/* Decorative element */}
+                            {/* Decorative element with accent color */}
                             <Box sx={{ mt: 2, mb: 1 }}>
                                 <Divider
                                     sx={{
                                         width: '50%',
-                                        borderColor: '#00000',
+                                        borderColor: '#00695C',
                                         mx: 'auto',
                                         mb: 1,
                                     }}
@@ -135,7 +144,7 @@ export default function WaterUsage() {
                                 <Typography
                                     variant="caption"
                                     sx={{
-                                        color: '#00000',
+                                        color: '#00695C',
                                         fontStyle: 'italic',
                                     }}
                                 >
