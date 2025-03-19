@@ -8,16 +8,12 @@ export default function GallerySlider() {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-    // Array of image URLs – update with your own paths
+    // Updated array of image objects with captions and an optional portrait flag.
     const images = [
-        '/img1.jpg',
-        '/bg2.webp',
-        '/bg-4.webp',
-        '/bg3.webp',
-        '/bg4.webp',
-        '/img1.jpg',
-        '/bh-3.webp',
-        '/bg-2.webp',
+        { src: '/img1.jpg', caption: 'First Image' },
+        { src: '/img2.jpg', caption: 'Director of NIH Roorkee', isPortrait: true },
+        { src: '/img3.jpg', caption: 'Sharmilla Oswal Millet Woman of India' },
+        { src: '/img4.jpg', caption: 'Presenting the kit to an audience.' },
     ];
 
     const imagesPerSlide = isMobile ? 1 : 4;
@@ -27,7 +23,7 @@ export default function GallerySlider() {
     // Auto-advance slide every 5 seconds
     useEffect(() => {
         const timer = setInterval(() => {
-            setCurrentSlide((prev) => (prev + 1) % totalSlides);
+            setCurrentSlide(prev => (prev + 1) % totalSlides);
         }, 5000);
         return () => clearInterval(timer);
     }, [totalSlides]);
@@ -40,16 +36,16 @@ export default function GallerySlider() {
 
     // Navigation handlers
     const handlePrev = () => {
-        setCurrentSlide((prev) => (prev - 1 + totalSlides) % totalSlides);
+        setCurrentSlide(prev => (prev - 1 + totalSlides) % totalSlides);
     };
     const handleNext = () => {
-        setCurrentSlide((prev) => (prev + 1) % totalSlides);
+        setCurrentSlide(prev => (prev + 1) % totalSlides);
     };
 
-    // Fade-in animation for slide transition
+    // Fade-in animation for slide transition with a slight scale effect
     const fadeIn = keyframes`
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
   `;
 
     return (
@@ -107,28 +103,66 @@ export default function GallerySlider() {
                                 width: `${100 / totalSlides}%`,
                                 display: 'grid',
                                 gridTemplateColumns: `repeat(${isMobile ? 1 : 4}, 1fr)`,
-                                gap: 2,
+                                gap: 3,
                             }}
                         >
                             {slide.map((img, i) => (
                                 <Box
                                     key={i}
-                                    component="img"
-                                    src={img}
-                                    alt={`Gallery Image ${slideIndex * imagesPerSlide + i + 1}`}
                                     sx={{
-                                        width: '100%',
-                                        height: { xs: '200px', md: '250px' },
-                                        objectFit: 'cover',
+                                        background: 'linear-gradient(135deg, #fff, #f7f9fc)',
                                         borderRadius: 2,
-                                        boxShadow: '0px 4px 8px rgba(0,0,0,0.1)',
+                                        overflow: 'hidden',
+                                        boxShadow: '0px 4px 12px rgba(0,0,0,0.1)',
                                         transition: 'transform 0.3s ease, box-shadow 0.3s ease',
                                         '&:hover': {
-                                            transform: 'scale(1.03)',
-                                            boxShadow: '0px 6px 12px rgba(0,0,0,0.15)',
+                                            transform: 'translateY(-5px) scale(1.02)',
+                                            boxShadow: '0px 8px 20px rgba(0,0,0,0.2)',
                                         },
                                     }}
-                                />
+                                >
+                                    {/* Image container */}
+                                    <Box
+                                        sx={{
+                                            width: '100%',
+                                            height: { xs: '200px', md: '250px' },
+                                            overflow: 'hidden',
+                                        }}
+                                    >
+                                        <Box
+                                            component="img"
+                                            src={img.src}
+                                            alt={`Gallery Image ${slideIndex * imagesPerSlide + i + 1}`}
+                                            sx={{
+                                                width: '100%',
+                                                height: '100%',
+                                                objectFit: 'cover',
+                                                // For portrait images, position at the top and clip to show only top half
+                                                objectPosition: img.isPortrait ? 'top' : 'center',
+                                                clipPath: img.isPortrait ? 'inset(0 0 0%)' : 'none',
+                                                transition: 'transform 0.3s ease',
+                                            }}
+                                        />
+                                    </Box>
+                                    <Box
+                                        sx={{
+                                            p: 2,
+                                            backgroundColor: '#fff',
+                                            textAlign: 'center',
+                                            borderTop: '1px solid #e0e0e0',
+                                        }}
+                                    >
+                                        <Typography
+                                            variant="subtitle1"
+                                            sx={{
+                                                fontWeight: 500,
+                                                color: '#2C3E50',
+                                            }}
+                                        >
+                                            {img.caption}
+                                        </Typography>
+                                    </Box>
+                                </Box>
                             ))}
                         </Box>
                     ))}

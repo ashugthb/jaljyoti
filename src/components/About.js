@@ -11,7 +11,7 @@ const fadeIn = keyframes`
 export default function About() {
     // Replace baseUrl with your published Google Slides embed URL
     const baseUrl = useMemo(() => {
-        return "https://docs.google.com/presentation/d/e/2PACX-1vRPJh2QdcJImX4DELW-7zxBL55ONjJHoYrxvm_O0u2cJPvwpj2KNJh6zLbKfiD_VA/embed?start=true&loop=true&delayms=3000";
+        return "https://docs.google.com/presentation/d/e/2PACX-1vSXqS7lNFepCCH4dz0lSsxKkGxlcr7y1JAj_vxBrGRyLldAzVQby-gQ5fv0cQ7_UNEFrcTMygsxH4uv/embed?start=true&loop=true&delayms=3000";
     }, []);
 
     return (
@@ -84,6 +84,8 @@ export default function About() {
                         title="Google Slides Presentation"
                         loading="lazy"
                     />
+
+                    {/* <iframe src="" frameborder="0" width="3178" height="2274" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe> */}
                 </Box>
 
                 {/* Video Container */}
