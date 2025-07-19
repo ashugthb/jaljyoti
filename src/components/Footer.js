@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import {
     Box,
     Container,
@@ -68,12 +69,14 @@ export default function Footer() {
                 localStorage.setItem('token', data.token);
                 setIsAdminLoggedIn(true);
                 setOpenAdminLogin(false);
+                toast.success('Logged in successfully');
                 window.location.href = '/admin-dashboard';
             } else {
-                alert(data.message);
+                toast.error(data.message || 'Login failed');
             }
         } catch (error) {
             console.error('Error:', error);
+            toast.error('Login request failed');
         }
     };
 
