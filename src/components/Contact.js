@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { toast } from 'react-toastify';
 import {
     Box,
     Button,
@@ -9,7 +10,6 @@ import {
     DialogTitle,
     Grid,
     TextField,
-    Alert,
 } from "@mui/material";
 
 export default function Contact() {
@@ -22,12 +22,10 @@ export default function Contact() {
         message: "",
     });
     const [loading, setLoading] = useState(false);
-    const [alert, setAlert] = useState({ type: "", message: "" });
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => {
         setOpen(false);
-        setAlert({ type: "", message: "" });
     };
 
     const handleChange = (e) => {
@@ -37,7 +35,6 @@ export default function Contact() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-        setAlert({ type: "", message: "" });
 
         try {
             const res = await fetch("/api/contact", {
@@ -48,16 +45,9 @@ export default function Contact() {
 
             const data = await res.json();
             if (!res.ok) {
-                setAlert({
-                    type: "error",
-                    message: data.message || "Something went wrong",
-                });
+                toast.error(data.message || "Something went wrong");
             } else {
-                setAlert({
-                    type: "success",
-                    message: data.message || "Message sent successfully",
-                });
-                // Clear the form fields
+                toast.success(data.message || "Message sent successfully");
                 setFormData({
                     name: "",
                     email: "",
@@ -67,10 +57,7 @@ export default function Contact() {
                 });
             }
         } catch (error) {
-            setAlert({
-                type: "error",
-                message: error.message || "Something went wrong",
-            });
+            toast.error(error.message || "Something went wrong");
         }
         setLoading(false);
     };
@@ -128,11 +115,6 @@ export default function Contact() {
                     Contact Us
                 </DialogTitle>
                 <DialogContent>
-                    {alert.message && (
-                        <Alert severity={alert.type} sx={{ mb: 2 }}>
-                            {alert.message}
-                        </Alert>
-                    )}
                     <Box component="form" onSubmit={handleSubmit} id="contact-form">
                         <Grid container spacing={1} sx={{ mt: 1 }}>
                             <Grid item xs={12} sm={6}>

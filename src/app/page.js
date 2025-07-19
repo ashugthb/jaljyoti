@@ -9,6 +9,9 @@ import Team from "../components/Team";
 import Contact from "../components/Contact";
 import Footer from "../components/Footer";
 import ImageGallery from "@/components/Gallary";
+import FadeInSection from "../components/FadeInSection";
+import Stats from "../components/Stats";
+import BackToTopButton from "../components/BackToTopButton";
 
 export default function Home() {
   // Use noSsr option to avoid mismatches during hydration.
@@ -87,21 +90,25 @@ export default function Home() {
         <Hero isMobile={isMobile} />
       </Box>
       <Box component="section" id="about" ref={aboutRef}>
-        <About />
+        <FadeInSection><About /></FadeInSection>
       </Box>
       <Box component="section" id="gallary" >
-        <ImageGallery />
+        <FadeInSection><ImageGallery /></FadeInSection>
       </Box>
       <Box component="section" id="water-usage" ref={waterUsageRef}>
-        <WaterUsage />
+        <FadeInSection><WaterUsage /></FadeInSection>
       </Box>
+      <FadeInSection>
+        <Stats />
+      </FadeInSection>
       <Box component="section" id="team" ref={teamRef}>
-        <Team isMobile={isMobile} />
+        <FadeInSection><Team isMobile={isMobile} /></FadeInSection>
       </Box>
       <Box component="section" id="contact" ref={contactRef}>
-        <Contact />
+        <FadeInSection><Contact /></FadeInSection>
       </Box>
       <Footer />
+      <BackToTopButton />
     </Box>
   );
 }
