@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import { toast } from 'react-toastify';
 import {
     Box,
     Button,
@@ -69,6 +70,12 @@ export default function AdminDashboard() {
         window.location.href = "/";
     };
 
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        toast.success('Logged out');
+        window.location.href = '/';
+    };
+
     if (loading) {
         return (
             <Box sx={{
@@ -124,17 +131,19 @@ export default function AdminDashboard() {
             p: isMobile ? 2 : 4,
             animation: `${fadeIn} 0.5s ease-out`
         }}>
-            <Typography variant="h4" gutterBottom sx={{
-                fontWeight: 700,
-                color: '#2C3E50',
-                mb: 4,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 2
-            }}>
-                <Palette fontSize="large" />
-                Contact Management Dashboard
-            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Typography variant="h4" sx={{
+                    fontWeight: 700,
+                    color: '#2C3E50',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 2
+                }}>
+                    <Palette fontSize="large" />
+                    Contact Management Dashboard
+                </Typography>
+                <Button variant="outlined" onClick={handleLogout}>Logout</Button>
+            </Box>
 
             <TableContainer
                 component={Paper}
