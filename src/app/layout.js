@@ -1,18 +1,9 @@
 // app/layout.js
 
-import { Geist, Geist_Mono } from "next/font/google";
+// Using generic system fonts to avoid fetching Google Fonts during build
 import "./globals.css";
 import MuiProvider from "./MuiProvider"; // adjust the path if necessary
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata = {
   title: "Jaljyoti",
@@ -25,7 +16,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className="antialiased">
         <MuiProvider>{children}</MuiProvider>
       </body>
     </html>
