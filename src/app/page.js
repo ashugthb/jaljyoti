@@ -9,6 +9,7 @@ import Team from "../components/Team";
 import Contact from "../components/Contact";
 import Footer from "../components/Footer";
 import ImageGallery from "@/components/Gallary";
+import SlideGallery from "../components/SlideGallery";
 import FadeInSection from "../components/FadeInSection";
 import Stats from "../components/Stats";
 import BackToTopButton from "../components/BackToTopButton";
@@ -95,6 +96,9 @@ export default function Home() {
       <Box component="section" id="gallary" >
         <FadeInSection><ImageGallery /></FadeInSection>
       </Box>
+      <FadeInSection>
+        <SlideGallery slides={["/ppt-slides/slide1.svg","/ppt-slides/slide2.svg","/ppt-slides/slide3.svg"]} />
+      </FadeInSection>
       <Box component="section" id="water-usage" ref={waterUsageRef}>
         <FadeInSection><WaterUsage /></FadeInSection>
       </Box>
