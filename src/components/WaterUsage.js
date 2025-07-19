@@ -42,7 +42,7 @@ export default function WaterUsage() {
                 sx={{
                     fontWeight: 'bold',
                     fontFamily: '"Montserrat", sans-serif',
-                    background: 'linear-gradient(45deg, #00695C, #00838F)',
+                    background: `linear-gradient(45deg, ${theme.palette.primary.main}, #00838F)`,
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
                     mb: { xs: 10, md: 8, }
@@ -136,7 +136,7 @@ export default function WaterUsage() {
                                 <Divider
                                     sx={{
                                         width: '50%',
-                                        borderColor: '#00695C',
+                                        borderColor: theme.palette.primary.main,
                                         mx: 'auto',
                                         mb: 1,
                                     }}
@@ -144,7 +144,7 @@ export default function WaterUsage() {
                                 <Typography
                                     variant="caption"
                                     sx={{
-                                        color: '#00695C',
+                                        color: theme.palette.primary.main,
                                         fontStyle: 'italic',
                                     }}
                                 >

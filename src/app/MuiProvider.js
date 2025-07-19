@@ -6,6 +6,20 @@ import CssBaseline from "@mui/material/CssBaseline";
 
 // Create your theme on the client side
 const theme = createTheme({
+    palette: {
+        primary: {
+            main: '#00695C',
+        },
+        secondary: {
+            main: '#FF9800',
+        },
+    },
+    typography: {
+        fontFamily: 'var(--font-geist-sans)',
+        h4: {
+            fontWeight: 700,
+        },
+    },
     breakpoints: {
         values: {
             xs: 0,
@@ -15,7 +29,6 @@ const theme = createTheme({
             xl: 1536,
         },
     },
-    // Add additional theme customizations if needed
 });
 
 export default function MuiProvider({ children }) {
