@@ -10,43 +10,45 @@ export default function GallerySlider() {
 
     // Updated array of image objects with captions and an optional portrait flag.
     const images = [
-        { src: '/img1.jpg', caption: 'First Image' },
+        { src: '/img1.jpg', caption: 'Received the First Poster Award at NIH Roorkee for the PSD Test.' },
         { src: '/img2.jpg', caption: 'Director of NIH Roorkee', isPortrait: true },
         { src: '/img3.jpg', caption: 'Sharmilla Oswal Millet Woman of India' },
         { src: '/img4.jpg', caption: 'Presenting the kit to an audience.' },
+        { src: '/img5.jpg', caption: 'Shwoing test in THRIVE exhibition' },
+        { src: '/img7.jpg', caption: 'Demonstrating test to the prof. M. Jagadesh Kumar (Former chairman of UGC) ' },
+        { src: '/img8.jpg', caption: 'Kit presentaion in rural area ' }
     ];
 
-    const imagesPerSlide = isMobile ? 1 : 4;
-    const totalSlides = Math.ceil(images.length / imagesPerSlide);
-    const [currentSlide, setCurrentSlide] = useState(0);
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const imagesPerView = isMobile ? 1 : 4;
 
-    // Auto-advance slide every 5 seconds
     useEffect(() => {
         const timer = setInterval(() => {
-            setCurrentSlide(prev => (prev + 1) % totalSlides);
-        }, 5000);
+            setCurrentIndex(prev => (prev + 1) % images.length);
+        }, 2000);
         return () => clearInterval(timer);
-    }, [totalSlides]);
+    }, [images.length]);
 
-    // Split images into slides based on imagesPerSlide
-    const slides = [];
-    for (let i = 0; i < totalSlides; i++) {
-        slides.push(images.slice(i * imagesPerSlide, i * imagesPerSlide + imagesPerSlide));
-    }
-
-    // Navigation handlers
     const handlePrev = () => {
-        setCurrentSlide(prev => (prev - 1 + totalSlides) % totalSlides);
-    };
-    const handleNext = () => {
-        setCurrentSlide(prev => (prev + 1) % totalSlides);
+        setCurrentIndex(prev => (prev - 1 + images.length) % images.length);
     };
 
-    // Fade-in animation for slide transition with a slight scale effect
-    const fadeIn = keyframes`
-    from { opacity: 0; transform: scale(0.95); }
-    to { opacity: 1; transform: scale(1); }
-  `;
+    const handleNext = () => {
+        setCurrentIndex(prev => (prev + 1) % images.length);
+    };
+
+    const getVisibleImages = () => {
+        if (isMobile) {
+            return [images[currentIndex]];
+        }
+        const visibleImages = [];
+        for (let i = 0; i < imagesPerView; i++) {
+            visibleImages.push(images[(currentIndex + i) % images.length]);
+        }
+        return visibleImages;
+    };
+
+    
 
     return (
         <Box
@@ -89,81 +91,67 @@ export default function GallerySlider() {
             >
                 <Box
                     sx={{
-                        display: 'flex',
-                        width: `${totalSlides * 100}%`,
-                        transform: `translateX(-${currentSlide * (100 / totalSlides)}%)`,
-                        transition: 'transform 1s ease',
-                        animation: `${fadeIn} 1s ease`,
+                        display: 'grid',
+                        gridTemplateColumns: `repeat(${imagesPerView}, 1fr)`,
+                        gap: 3,
+                        transition: 'transform 0.5s ease-in-out',
                     }}
                 >
-                    {slides.map((slide, slideIndex) => (
+                    {getVisibleImages().map((img, i) => (
                         <Box
-                            key={slideIndex}
+                            key={i}
                             sx={{
-                                width: `${100 / totalSlides}%`,
-                                display: 'grid',
-                                gridTemplateColumns: `repeat(${isMobile ? 1 : 4}, 1fr)`,
-                                gap: 3,
+                                background: 'linear-gradient(135deg, #fff, #f7f9fc)',
+                                borderRadius: 2,
+                                overflow: 'hidden',
+                                boxShadow: '0px 4px 12px rgba(0,0,0,0.1)',
+                                transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                                '&:hover': {
+                                    transform: 'translateY(-5px) scale(1.02)',
+                                    boxShadow: '0px 8px 20px rgba(0,0,0,0.2)',
+                                },
                             }}
                         >
-                            {slide.map((img, i) => (
+                            {/* Image container */}
+                            <Box
+                                sx={{
+                                    width: '100%',
+                                    height: { xs: '200px', md: '250px' },
+                                    overflow: 'hidden',
+                                }}
+                            >
                                 <Box
-                                    key={i}
+                                    component="img"
+                                    src={img.src}
+                                    alt={`Gallery Image ${i + 1}`}
                                     sx={{
-                                        background: 'linear-gradient(135deg, #fff, #f7f9fc)',
-                                        borderRadius: 2,
-                                        overflow: 'hidden',
-                                        boxShadow: '0px 4px 12px rgba(0,0,0,0.1)',
-                                        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-                                        '&:hover': {
-                                            transform: 'translateY(-5px) scale(1.02)',
-                                            boxShadow: '0px 8px 20px rgba(0,0,0,0.2)',
-                                        },
+                                        width: '100%',
+                                        height: '100%',
+                                        objectFit: 'cover',
+                                        objectPosition: img.isPortrait ? 'top' : 'center',
+                                        clipPath: img.isPortrait ? 'inset(0 0 0%)' : 'none',
+                                        transition: 'transform 0.3s ease',
+                                    }}
+                                />
+                            </Box>
+                            <Box
+                                sx={{
+                                    p: 2,
+                                    backgroundColor: '#fff',
+                                    textAlign: 'center',
+                                    borderTop: '1px solid #e0e0e0',
+                                }}
+                            >
+                                <Typography
+                                    variant="subtitle1"
+                                    sx={{
+                                        fontWeight: 500,
+                                        color: '#2C3E50',
                                     }}
                                 >
-                                    {/* Image container */}
-                                    <Box
-                                        sx={{
-                                            width: '100%',
-                                            height: { xs: '200px', md: '250px' },
-                                            overflow: 'hidden',
-                                        }}
-                                    >
-                                        <Box
-                                            component="img"
-                                            src={img.src}
-                                            alt={`Gallery Image ${slideIndex * imagesPerSlide + i + 1}`}
-                                            sx={{
-                                                width: '100%',
-                                                height: '100%',
-                                                objectFit: 'cover',
-                                                // For portrait images, position at the top and clip to show only top half
-                                                objectPosition: img.isPortrait ? 'top' : 'center',
-                                                clipPath: img.isPortrait ? 'inset(0 0 0%)' : 'none',
-                                                transition: 'transform 0.3s ease',
-                                            }}
-                                        />
-                                    </Box>
-                                    <Box
-                                        sx={{
-                                            p: 2,
-                                            backgroundColor: '#fff',
-                                            textAlign: 'center',
-                                            borderTop: '1px solid #e0e0e0',
-                                        }}
-                                    >
-                                        <Typography
-                                            variant="subtitle1"
-                                            sx={{
-                                                fontWeight: 500,
-                                                color: '#2C3E50',
-                                            }}
-                                        >
-                                            {img.caption}
-                                        </Typography>
-                                    </Box>
-                                </Box>
-                            ))}
+                                    {img.caption}
+                                </Typography>
+                            </Box>
                         </Box>
                     ))}
                 </Box>

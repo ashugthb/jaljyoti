@@ -24,6 +24,28 @@ const teamMembers = [
             "Specializes in cost-effective and user-friendly bacterial detection techniques.",
             "Committed to bridging scientific innovation with real-world applications for safe and sustainable water resources."
         ]
+    },
+    {
+        name: "Sanjeet Athawale",
+        designation: "Product manager",
+        image: "/sanjeet.jpg",
+        details: [
+            "B.tech 4th year student at IIT Jodhpur.",
+            "Pursuing a major in Electrical Engineering.",
+            "Experienced in product management and development.",
+            "Skilled in market research, user experience design, and project coordination."
+        ]
+    },
+    {
+        name: "Satyam Sharma",
+        designation: "Sales/Marketing Lead",
+        image: "/Asset.png",
+        details: [
+           "B.tech 4th year student at IIT Jodhpur.",
+            "Pursuing a major in Computer science Engineering.",
+            "Experienced in sales and marketing strategies.",
+            "Skilled in digital marketing, customer engagement, and brand promotion."
+        ]
     }
 ];
 

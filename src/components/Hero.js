@@ -85,7 +85,7 @@ export default function Hero({ isMobile }) {
                             textShadow: '1px 1px 2px rgba(0,0,0,0.7)',
                         }}
                     >
-                        Real-Time Data • Advanced Sensors • 24/7 Monitoring
+                        Real-Time Data •  Smart Paper Based Test  • 24/7 Monitoring
                     </Typography>
                     <Typography
                         variant="body2"

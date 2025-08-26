@@ -4,9 +4,9 @@ import { Box, Grid, Typography } from '@mui/material';
 import FadeInSection from './FadeInSection';
 
 const statsData = [
-  { label: 'Samples Tested', value: 1200 },
-  { label: 'Locations Monitored', value: 25 },
-  { label: 'Users Engaged', value: 500 },
+  // { label: 'Samples Tested', value: 1200 },
+  // { label: 'Locations Monitored', value: 25 },
+  // { label: 'Users Engaged', value: 500 },
 ];
 
 export default function Stats() {
