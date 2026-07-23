@@ -7,7 +7,7 @@ const teamMembers = [
         designation: "Non-executive Director",
         image: "/Prof.MeenuChhabra.jpg",
         details: [
-            "Distinguished Professor in the Department of Bioscience at IIT Jodhpur.",
+            "Professor in the Department of Bioscience at IIT Jodhpur.",
             "Head of the Center for Emerging Technologies for Sustainable Development (CETSD).",
             "Expert in biotechnology and environmental microbiology.",
             "Research focuses on microbial technologies for environmental remediation and biosensing applications.",
@@ -35,18 +35,19 @@ const teamMembers = [
             "Experienced in product management and development.",
             "Skilled in market research, user experience design, and project coordination."
         ]
-    },
-    {
-        name: "Satyam Sharma",
-        designation: "Sales/Marketing Lead",
-        image: "/Asset.png",
-        details: [
-           "B.tech 4th year student at IIT Jodhpur.",
-            "Pursuing a major in Computer science Engineering.",
-            "Experienced in sales and marketing strategies.",
-            "Skilled in digital marketing, customer engagement, and brand promotion."
-        ]
     }
+    // ,
+    // {
+    //     name: "Satyam Sharma",
+    //     designation: "Sales/Marketing Lead",
+    //     image: "/Asset.png",
+    //     details: [
+    //        "B.tech 4th year student at IIT Jodhpur.",
+    //         "Pursuing a major in Computer science Engineering.",
+    //         "Experienced in sales and marketing strategies.",
+    //         "Skilled in digital marketing, customer engagement, and brand promotion."
+    //     ]
+    // }
 ];
 
 export default function Team({ isMobile }) {
