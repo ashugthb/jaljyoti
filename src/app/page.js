@@ -15,7 +15,9 @@ import BackToTopButton from "../components/BackToTopButton";
 
 export default function Home() {
   // Use noSsr option to avoid mismatches during hydration.
-  const isMobile = useMediaQuery((theme) => theme.breakpoints.down("md"), { noSsr: true });
+  const isMobile = useMediaQuery((theme) => theme.breakpoints.down("md"), {
+    noSsr: true,
+  });
 
   // Define refs for each section
   const homeRef = useRef(null);
@@ -29,20 +31,30 @@ export default function Home() {
   // Navigation items with associated refs and labels
   const navItems = [
     { id: "home", label: "HOME", ref: homeRef },
-    { id: "about", label: "ABOUT", ref: aboutRef },
-    { id: "water-usage", label: "WATER USAGE", ref: waterUsageRef },
-    { id: "team", label: "TEAM", ref: teamRef },
-    { id: "contact", label: "CONTACT", ref: contactRef }
+    { id: "product", label: "PRODUCT", ref: aboutRef },
+    { id: "research", label: "RESEARCH", ref: waterUsageRef },
+    { id: "work", label: "OUR WORK", ref: teamRef },
+    { id: "team", label: "TEAM", ref: contactRef },
   ];
 
   // Update the active tab based on scroll position
   const handleScroll = () => {
     const offset = 90; // Adjust based on header height
-    const homePos = homeRef.current ? homeRef.current.getBoundingClientRect().top - offset : Infinity;
-    const aboutPos = aboutRef.current ? aboutRef.current.getBoundingClientRect().top - offset : Infinity;
-    const waterUsagePos = waterUsageRef.current ? waterUsageRef.current.getBoundingClientRect().top - offset : Infinity;
-    const teamPos = teamRef.current ? teamRef.current.getBoundingClientRect().top - offset : Infinity;
-    const contactPos = contactRef.current ? contactRef.current.getBoundingClientRect().top - offset : Infinity;
+    const homePos = homeRef.current
+      ? homeRef.current.getBoundingClientRect().top - offset
+      : Infinity;
+    const aboutPos = aboutRef.current
+      ? aboutRef.current.getBoundingClientRect().top - offset
+      : Infinity;
+    const waterUsagePos = waterUsageRef.current
+      ? waterUsageRef.current.getBoundingClientRect().top - offset
+      : Infinity;
+    const teamPos = teamRef.current
+      ? teamRef.current.getBoundingClientRect().top - offset
+      : Infinity;
+    const contactPos = contactRef.current
+      ? contactRef.current.getBoundingClientRect().top - offset
+      : Infinity;
 
     if (homePos <= 0 && aboutPos > 0) {
       setActiveTab("HOME");
@@ -66,12 +78,13 @@ export default function Home() {
   const scrollToSection = (ref, tabName) => {
     if (ref.current) {
       const offset = 80; // Adjust this value based on the fixed header height
-      const elementPosition = ref.current.getBoundingClientRect().top + window.pageYOffset;
+      const elementPosition =
+        ref.current.getBoundingClientRect().top + window.pageYOffset;
       const offsetPosition = elementPosition - offset;
 
       window.scrollTo({
         top: offsetPosition,
-        behavior: "smooth"
+        behavior: "smooth",
       });
 
       setActiveTab(tabName);
@@ -90,22 +103,32 @@ export default function Home() {
         <Hero isMobile={isMobile} />
       </Box>
       <Box component="section" id="about" ref={aboutRef}>
-        <FadeInSection><About /></FadeInSection>
+        <FadeInSection>
+          <About />
+        </FadeInSection>
       </Box>
-      <Box component="section" id="gallary" >
-        <FadeInSection><ImageGallery /></FadeInSection>
+      <Box component="section" id="gallary">
+        <FadeInSection>
+          <ImageGallery />
+        </FadeInSection>
       </Box>
       <Box component="section" id="water-usage" ref={waterUsageRef}>
-        <FadeInSection><WaterUsage /></FadeInSection>
+        <FadeInSection>
+          <WaterUsage />
+        </FadeInSection>
       </Box>
       <FadeInSection>
         <Stats />
       </FadeInSection>
       <Box component="section" id="team" ref={teamRef}>
-        <FadeInSection><Team isMobile={isMobile} /></FadeInSection>
+        <FadeInSection>
+          <Team isMobile={isMobile} />
+        </FadeInSection>
       </Box>
       <Box component="section" id="contact" ref={contactRef}>
-        <FadeInSection><Contact /></FadeInSection>
+        <FadeInSection>
+          <Contact />
+        </FadeInSection>
       </Box>
       <Footer />
       <BackToTopButton />
