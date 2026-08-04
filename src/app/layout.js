@@ -1,6 +1,6 @@
 // app/layout.js
 
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Manrope, Inter } from "next/font/google";
 import "./globals.css";
 import MuiProvider from "./MuiProvider"; // adjust the path if necessary
 
@@ -14,6 +14,21 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// Design-system typefaces: Manrope for headings, Inter for body/UI.
+const manrope = Manrope({
+  variable: "--font-manrope",
+  subsets: ["latin"],
+  weight: ["400", "600", "700", "800"],
+  display: "swap",
+});
+
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
+
 export const metadata = {
   title: "Jaljyoti",
   description: "Jaljyoti",
@@ -25,7 +40,9 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} ${manrope.variable} ${inter.variable} antialiased`}
+      >
         <MuiProvider>{children}</MuiProvider>
       </body>
     </html>

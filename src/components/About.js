@@ -16,6 +16,7 @@ export default function About() {
 
     return (
         <Container
+        
             sx={{
                 py: { xs: 3, md: 5 },
                 px: { xs: 2, md: 4 },
