@@ -19,11 +19,15 @@ import TimerIcon from "@mui/icons-material/Timer";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import WaterDropIcon from "@mui/icons-material/WaterDrop";
 import AmbientBackground from "@/components/site/AmbientBackground";
+import CursorSpotlight from "@/components/site/CursorSpotlight";
+import FilmModal from "@/components/site/FilmModal";
 import { useGetStarted } from "@/components/site/GetStarted";
 import LoadReveal from "@/components/site/LoadReveal";
+import Magnetic from "@/components/site/Magnetic";
 import MediaFrame from "@/components/site/MediaFrame";
 import Reveal from "@/components/site/Reveal";
 import SiteShell from "@/components/site/SiteShell";
+import TiltCard from "@/components/site/TiltCard";
 
 /**
  * ---------------------------------------------------------------------------
@@ -350,6 +354,7 @@ function ProductMain() {
       {/* Hero */}
       <section className="relative flex min-h-[90vh] items-center overflow-hidden py-20">
         <AmbientBackground variant="hero" />
+        <CursorSpotlight className="absolute inset-0" />
 
         <div className="relative z-10 mx-auto grid max-w-[1280px] grid-cols-1 items-center gap-16 px-margin-mobile md:px-margin-desktop lg:grid-cols-2">
           <div>
@@ -385,17 +390,19 @@ function ProductMain() {
             </LoadReveal>
 
             <LoadReveal as="div" variant="pop" delay={380} className="flex flex-wrap gap-4">
-              <button
-                type="button"
-                onClick={() => openGetStarted("Book a demo")}
-                className="group flex items-center gap-2 rounded-xl bg-primary px-8 py-4 font-display font-bold text-on-primary shadow-lg transition-colors hover:bg-primary-container active:scale-[0.98]"
-              >
-                Request demo
-                <ArrowForwardIcon
-                  sx={{ fontSize: 20 }}
-                  className="transition-transform group-hover:translate-x-1"
-                />
-              </button>
+              <Magnetic>
+                <button
+                  type="button"
+                  onClick={() => openGetStarted("Book a demo")}
+                  className="group flex items-center gap-2 rounded-xl bg-primary px-8 py-4 font-display font-bold text-on-primary shadow-lg transition-colors hover:bg-primary-container active:scale-[0.98]"
+                >
+                  Request demo
+                  <ArrowForwardIcon
+                    sx={{ fontSize: 20 }}
+                    className="transition-transform group-hover:translate-x-1"
+                  />
+                </button>
+              </Magnetic>
               <a
                 href="#how-it-works"
                 className="rounded-xl border border-outline-variant bg-white/60 px-8 py-4 font-display font-bold text-on-surface transition-colors hover:bg-surface-container"
@@ -404,11 +411,15 @@ function ProductMain() {
               </a>
             </LoadReveal>
 
+            <LoadReveal as="div" variant="blur" delay={480} className="mt-8">
+              <FilmModal />
+            </LoadReveal>
+
             <LoadReveal
               as="dl"
               variant="blur"
-              delay={520}
-              className="mt-12 grid grid-cols-3 gap-4 border-t border-outline-variant/40 pt-8"
+              delay={600}
+              className="mt-8 grid grid-cols-3 gap-4 border-t border-outline-variant/40 pt-8"
             >
               {HERO_FACTS.map((fact) => (
                 <div key={fact.label}>
@@ -433,53 +444,68 @@ function ProductMain() {
               className="relative w-full max-w-md"
             >
               <div className="jj-image-glow" aria-hidden="true" />
-              <MediaFrame
-                src={IMAGES.hero.src}
-                alt={IMAGES.hero.alt}
-                label={IMAGES.hero.label}
-                hint={IMAGES.hero.hint}
-                priority
-                sizes="(max-width: 1024px) 100vw, 480px"
-                className="aspect-[4/5] w-full rounded-[40px] shadow-[0_40px_80px_-20px_rgba(0,92,85,0.4)]"
-              />
-              {/* Cinematic gradient so the glass card below stays legible and
-                  the image reads as lit rather than flat. */}
-              <div className="pointer-events-none absolute inset-0 rounded-[40px] bg-gradient-to-t from-black/60 via-black/5 to-transparent" />
-              <div className="jj-glass absolute right-4 bottom-6 left-4 rounded-2xl p-5">
-                <p className="mb-1 font-body text-label-md uppercase tracking-widest text-primary">
-                  Result window
-                </p>
-                <p className="font-display text-body-lg font-bold text-on-surface">
-                  Colour shift readable by eye — no instrument required.
-                </p>
-              </div>
+              <TiltCard>
+                <MediaFrame
+                  src={IMAGES.hero.src}
+                  alt={IMAGES.hero.alt}
+                  label={IMAGES.hero.label}
+                  hint={IMAGES.hero.hint}
+                  priority
+                  sizes="(max-width: 1024px) 100vw, 480px"
+                  className="aspect-[4/5] w-full rounded-[40px] shadow-[0_40px_80px_-20px_rgba(0,92,85,0.4)]"
+                />
+                {/* Cinematic gradient so the glass card below stays legible
+                    and the image reads as lit rather than flat. */}
+                <div className="pointer-events-none absolute inset-0 rounded-[40px] bg-gradient-to-t from-black/60 via-black/5 to-transparent" />
+                <div className="jj-glass absolute right-4 bottom-6 left-4 rounded-2xl p-5">
+                  <p className="mb-1 font-body text-label-md uppercase tracking-widest text-primary">
+                    Result window
+                  </p>
+                  <p className="font-display text-body-lg font-bold text-on-surface">
+                    Colour shift readable by eye — no instrument required.
+                  </p>
+                </div>
+              </TiltCard>
             </LoadReveal>
           </div>
         </div>
       </section>
 
       {/* Trust markers */}
-      <section className="border-y border-outline-variant/20 bg-surface-container-low py-16">
-        <div className="mx-auto max-w-[1280px] px-margin-mobile md:px-margin-desktop">
-          <p className="mb-12 text-center font-body text-label-md uppercase tracking-[0.2em] text-outline">
-            Developed and demonstrated with
-          </p>
-          <div className="grid grid-cols-1 items-start justify-items-center gap-8 sm:grid-cols-2 md:grid-cols-4">
-            {TRUST_MARKERS.map(({ icon: Icon, label, detail }) => (
-              <div
-                key={label}
-                className="flex items-start gap-3 text-center sm:text-left"
-              >
-                <Icon sx={{ fontSize: 36 }} className="shrink-0 text-primary" />
-                <div>
-                  <div className="font-display text-body-lg font-bold tracking-tight text-on-surface">
-                    {label}
+      <section className="relative overflow-hidden border-y border-outline-variant/20 bg-surface-container-low py-20">
+        {/* Soft centred wash + a hairline "light beam" marking the section,
+            instead of a flat border — the considered-luxury touch a plain
+            row of icons was missing. */}
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_100%_at_50%_0%,rgba(0,92,85,0.06),transparent)]" />
+        <div className="pointer-events-none absolute top-0 left-1/2 h-px w-48 -translate-x-1/2 bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+
+        <div className="relative mx-auto max-w-[1280px] px-margin-mobile md:px-margin-desktop">
+          <Reveal className="mb-14 text-center">
+            <p className="font-body text-label-md uppercase tracking-[0.3em] text-outline">
+              Developed and demonstrated with
+            </p>
+          </Reveal>
+
+          <div className="grid grid-cols-1 gap-y-10 sm:grid-cols-2 md:grid-cols-4 md:gap-y-0">
+            {TRUST_MARKERS.map(({ icon: Icon, label, detail }, index) => (
+              <Reveal key={label} delay={index * 100}>
+                <div className="group flex items-center gap-4 md:justify-center md:border-l md:border-outline-variant/25 md:px-6 md:first:border-l-0">
+                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/10 to-transparent ring-1 ring-primary/10 transition-all duration-500 group-hover:-translate-y-0.5 group-hover:from-primary/20 group-hover:shadow-[0_10px_24px_rgba(0,92,85,0.18)] group-hover:ring-primary/30">
+                    <Icon
+                      sx={{ fontSize: 26 }}
+                      className="text-primary/55 transition-colors duration-500 group-hover:text-primary"
+                    />
                   </div>
-                  <div className="font-body text-body-sm text-on-surface-variant">
-                    {detail}
+                  <div>
+                    <div className="font-display text-body-lg font-bold tracking-tight text-on-surface">
+                      {label}
+                    </div>
+                    <div className="font-body text-body-sm text-on-surface-variant">
+                      {detail}
+                    </div>
                   </div>
                 </div>
-              </div>
+              </Reveal>
             ))}
           </div>
         </div>

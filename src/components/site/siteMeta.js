@@ -18,7 +18,6 @@ export const CONTACT = {
 // `action: "get-started"` opens the enquiry dialog instead of navigating.
 export const NAV_LINKS = [
   { label: "Home", href: "/" },
-  { label: "Technology", href: "/#how-it-works" },
   { label: "Team", href: "/team" },
   { label: "Gallery", href: "/gallery" },
   { label: "Contact", action: "get-started" },

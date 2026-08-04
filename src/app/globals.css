@@ -292,6 +292,46 @@ body {
   }
 
   /* ---------------------------------------------------------------------
+     Cursor-reactive interactions (CursorSpotlight, TiltCard, Magnetic) —
+     the hero's actual "wow" layer. All pure CSS transform/opacity, driven
+     from JS-set custom properties or requestAnimationFrame-scheduled inline
+     styles; nothing here runs a continuous per-frame loop.
+     --------------------------------------------------------------------- */
+  .jj-spotlight {
+    position: absolute;
+    inset: 0;
+    opacity: var(--spot-opacity, 0);
+    transition: opacity 0.4s ease;
+    background: radial-gradient(
+      520px circle at var(--spot-x, 50%) var(--spot-y, 50%),
+      rgba(0, 92, 85, 0.18),
+      rgba(76, 215, 246, 0.09) 40%,
+      transparent 70%
+    );
+  }
+
+  .jj-tilt-card {
+    transition: transform 0.2s ease-out;
+    transform-style: preserve-3d;
+    will-change: transform;
+  }
+
+  .jj-tilt-glare {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .jj-magnetic {
+    display: inline-flex;
+    transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+    will-change: transform;
+  }
+
+  /* ---------------------------------------------------------------------
      Load choreography (LoadReveal component) — fires on mount rather than
      on scroll, for content that is already in the viewport when the page
      opens (the hero). `both` fill-mode holds the pre- and post-animation
@@ -700,5 +740,14 @@ body {
 
   .jj-pulse-dot {
     animation: none !important;
+  }
+
+  .jj-spotlight {
+    display: none;
+  }
+
+  .jj-tilt-card,
+  .jj-magnetic {
+    transition: none !important;
   }
 }

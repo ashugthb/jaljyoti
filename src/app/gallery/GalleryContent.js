@@ -237,7 +237,7 @@ function GalleryMain() {
   }, []);
 
   return (
-    <main className="pt-32 pb-24">
+    <main className="pt-24 pb-24">
       <section className="relative mb-16">
         <AmbientBackground variant="subtle" />
         <div className="relative z-10 mx-auto max-w-[1280px] px-margin-mobile text-center md:px-margin-desktop">

@@ -1,10 +1,19 @@
 // components/MuiProvider.js
 "use client";
 
+import dynamic from "next/dynamic";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+
+// react-toastify's container mounts real DOM only on the client (there's
+// nothing to toast during a server render), so its SSR output and first
+// client render never match — a guaranteed hydration mismatch. Disabling SSR
+// for it entirely sidesteps the mismatch instead of masking it.
+const ToastContainer = dynamic(
+  () => import("react-toastify").then((mod) => mod.ToastContainer),
+  { ssr: false }
+);
 
 // Create your theme on the client side
 const theme = createTheme({
