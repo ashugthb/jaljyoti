@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getAdminEmail, getCustomerEmail } from "@app/utils/emailTemplates";
+import { getAdminEmail, getCustomerEmail } from "@/app/utils/emailTemplates";
 import { connect } from "@/app/utils/mongodb";
 import transporter from "@/app/utils/mail";
 import { rateLimiter } from "@/app/utils/rateLimiter";

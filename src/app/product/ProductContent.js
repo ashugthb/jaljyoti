@@ -1,7 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ArrowRightAltIcon from "@mui/icons-material/ArrowRightAlt";
 import BiotechIcon from "@mui/icons-material/Biotech";
@@ -18,8 +22,6 @@ import ScienceIcon from "@mui/icons-material/Science";
 import TimerIcon from "@mui/icons-material/Timer";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import WaterDropIcon from "@mui/icons-material/WaterDrop";
-import AmbientBackground from "@/components/site/AmbientBackground";
-import CursorSpotlight from "@/components/site/CursorSpotlight";
 import FilmModal from "@/components/site/FilmModal";
 import { useGetStarted } from "@/components/site/GetStarted";
 import LoadReveal from "@/components/site/LoadReveal";
@@ -27,7 +29,25 @@ import Magnetic from "@/components/site/Magnetic";
 import MediaFrame from "@/components/site/MediaFrame";
 import Reveal from "@/components/site/Reveal";
 import SiteShell from "@/components/site/SiteShell";
-import TiltCard from "@/components/site/TiltCard";
+import { BorderBeam } from "@/components/ui/border-beam";
+import { Marquee } from "@/components/ui/marquee";
+import { Spotlight } from "@/components/ui/spotlight-new";
+
+/**
+ * Both of these open a WebGL context on mount, so they are client-only and
+ * excluded from the server render. TestKitScene's `loading` element holds the
+ * hero's layout height, so nothing reflows when the canvas mounts.
+ */
+const Aurora = dynamic(() => import("@/components/ui/aurora"), { ssr: false });
+const TestKitScene = dynamic(() => import("@/components/three/TestKitScene"), {
+  ssr: false,
+  loading: () => (
+    <div
+      className="h-[24rem] w-full sm:h-[30rem] lg:h-[36rem]"
+      aria-hidden="true"
+    />
+  ),
+});
 
 /**
  * ---------------------------------------------------------------------------
@@ -170,6 +190,19 @@ const PROCESS_STEPS = [
     title: "Compare",
     body: "Read the result against the colour chart.",
   },
+];
+
+/**
+ * One accent per walkthrough step, pulled from the existing design tokens so
+ * the section gains colour without introducing a new palette. `ring` drives the
+ * rotating conic halo behind each icon; `dot` is the progress pip.
+ */
+const STEP_ACCENTS = [
+  { from: "#5bb8fe", to: "#9cf2e8", text: "text-secondary" },
+  { from: "#0f766e", to: "#80d5cb", text: "text-primary" },
+  { from: "#007488", to: "#acedff", text: "text-tertiary" },
+  { from: "#ffb84d", to: "#ffe0a3", text: "text-on-surface" },
+  { from: "#005c55", to: "#9cf2e8", text: "text-primary" },
 ];
 
 /**
@@ -349,15 +382,217 @@ function Simulator() {
 function ProductMain() {
   const { openGetStarted } = useGetStarted();
 
-  return (
-    <main className="pt-20">
-      {/* Hero */}
-      <section className="relative flex min-h-[90vh] items-center overflow-hidden py-20">
-        <AmbientBackground variant="hero" />
-        <CursorSpotlight className="absolute inset-0" />
+  const rootRef = useRef(null);
+  const heroRef = useRef(null);
+  const heroCopyRef = useRef(null);
+  const heroArtRef = useRef(null);
+  const processRef = useRef(null);
 
-        <div className="relative z-10 mx-auto grid max-w-[1280px] grid-cols-1 items-center gap-16 px-margin-mobile md:px-margin-desktop lg:grid-cols-2">
-          <div>
+  /**
+   * Scrub targets for the two 3D views. These are plain objects rather than
+   * state so ScrollTrigger can write to them every frame without re-rendering
+   * React — the r3f frame loop reads the value directly.
+   */
+  const heroKitProgress = useRef({ value: 0 });
+  const walkProgress = useRef({ value: 0 });
+
+  /**
+   * Scroll choreography, all GSAP ScrollTrigger. Lenis drives the same ticker
+   * (see SmoothScroll), so these stay locked to the scroll position instead of
+   * drifting a frame behind it.
+   *
+   * `gsap.matchMedia` is GSAP's own responsive/reduced-motion gate: everything
+   * registered inside a query is created when it matches and reverted when it
+   * stops, so the pin never applies on phones and nothing animates at all for
+   * someone who asked for reduced motion.
+   */
+  useGSAP(
+    () => {
+      gsap.registerPlugin(ScrollTrigger);
+      const mm = gsap.matchMedia();
+
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        // The hero recedes as the page takes over: copy lifts and dims while
+        // the droplet sinks and shrinks slightly, so the two layers separate.
+        gsap.to(heroCopyRef.current, {
+          y: -70,
+          opacity: 0.2,
+          ease: "none",
+          scrollTrigger: {
+            trigger: heroRef.current,
+            start: "top top",
+            end: "bottom top",
+            scrub: true,
+          },
+        });
+
+        gsap.to(heroArtRef.current, {
+          y: 70,
+          scale: 0.88,
+          ease: "none",
+          scrollTrigger: {
+            trigger: heroRef.current,
+            start: "top top",
+            end: "bottom top",
+            scrub: true,
+          },
+        });
+      });
+
+      // The hero kit drifts a little of the way along its camera path as the
+      // hero scrolls away, so the product is already in motion by the time the
+      // walkthrough takes over.
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        gsap.to(heroKitProgress.current, {
+          value: 0.16,
+          ease: "none",
+          scrollTrigger: {
+            trigger: heroRef.current,
+            start: "top top",
+            end: "bottom top",
+            scrub: true,
+          },
+        });
+      });
+
+      /**
+       * The product walkthrough — the Creality pattern, in live 3D.
+       *
+       * The section pins, and scroll scrubs a single value from 0 to 1. The
+       * camera rig inside the canvas reads that value and flies between its
+       * five waypoints, while each step's copy fades in as the camera settles
+       * on the part it describes and fades out again as it leaves.
+       *
+       * Desktop only. On a phone the pin would trap the viewport for five
+       * screens of scroll on a canvas too small to read, so the section falls
+       * back to the plain stacked list.
+       */
+      mm.add(
+        "(min-width: 768px) and (prefers-reduced-motion: no-preference)",
+        () => {
+          const steps = gsap.utils.toArray("[data-step]");
+          if (!steps.length || !processRef.current) return;
+
+          const timeline = gsap.timeline({
+            scrollTrigger: {
+              trigger: processRef.current,
+              start: "top top",
+              end: `+=${steps.length * 420}`,
+              pin: true,
+              scrub: 0.8,
+              anticipatePin: 1,
+            },
+          });
+
+          timeline.to(
+            walkProgress.current,
+            { value: 1, ease: "none", duration: steps.length - 1 },
+            0
+          );
+
+          // Each panel owns one waypoint's worth of the timeline, cross-fading
+          // with its neighbours so there is never a gap with no copy on screen.
+          steps.forEach((step, index) => {
+            const enterAt = Math.max(0, index - 0.18);
+
+            timeline.fromTo(
+              step,
+              { opacity: 0, y: 26 },
+              { opacity: 1, y: 0, duration: 0.34, ease: "power2.out" },
+              enterAt
+            );
+
+            // The icon tile builds itself as its step arrives: the conic halo
+            // sweeps a full turn while the chip pops in behind it, so the
+            // marker reads as instrumentation coming online rather than a
+            // static glyph fading up.
+            const halo = step.querySelector("[data-step-halo]");
+            const chip = step.querySelector("[data-step-icon]");
+
+            if (halo) {
+              timeline.fromTo(
+                halo,
+                { rotate: -180, scale: 0.75, opacity: 0 },
+                {
+                  rotate: 0,
+                  scale: 1,
+                  opacity: 0.7,
+                  duration: 0.55,
+                  ease: "power3.out",
+                },
+                enterAt
+              );
+            }
+
+            if (chip) {
+              timeline.fromTo(
+                chip,
+                { scale: 0.55, rotate: -22 },
+                {
+                  scale: 1,
+                  rotate: 0,
+                  duration: 0.5,
+                  ease: "back.out(2.4)",
+                },
+                enterAt + 0.08
+              );
+            }
+            if (index < steps.length - 1) {
+              timeline.to(
+                step,
+                { opacity: 0, y: -22, duration: 0.34, ease: "power2.in" },
+                index + 0.5
+              );
+            }
+          });
+        }
+      );
+
+      return () => mm.revert();
+    },
+    { scope: rootRef }
+  );
+
+  return (
+    <main className="pt-20" ref={rootRef}>
+      {/* Hero */}
+      {/* `isolate` matters here: Aceternity's Spotlight puts its beams at z-40
+          and the hero copy has to sit above them, but the site header is a
+          fixed z-50 bar. Without a stacking context on this section, the hero's
+          z-50 content competes with the header directly and wins on DOM order,
+          so scrolled copy paints over the nav. Isolating the section keeps that
+          whole z-range local. */}
+      <section
+        ref={heroRef}
+        className="relative isolate flex min-h-[92vh] items-center overflow-hidden py-20"
+      >
+        {/* React Bits Aurora — the WebGL base wash, masked so it dissolves
+            into the page instead of ending on a hard edge. */}
+        <div className="pointer-events-none absolute inset-0 opacity-25 [mask-image:linear-gradient(to_bottom,black,black_30%,transparent_85%)]">
+          <Aurora
+            colorStops={["#0f766e", "#5bb8fe", "#80d5cb"]}
+            amplitude={0.75}
+            blend={0.75}
+            speed={0.45}
+          />
+        </div>
+
+        {/* Aceternity Spotlight. Upstream's default gradients are mixed for a
+            near-black hero — pale and barely-there. These are the same three
+            gradients re-mixed for a light surface: more saturation, much less
+            lightness, so the beams actually read against #faf8ff. */}
+        <Spotlight
+          gradientFirst="radial-gradient(68.54% 68.72% at 55.02% 31.46%, hsla(176, 90%, 32%, .18) 0, hsla(176, 90%, 28%, .06) 50%, hsla(176, 90%, 25%, 0) 80%)"
+          gradientSecond="radial-gradient(50% 50% at 50% 50%, hsla(199, 100%, 42%, .13) 0, hsla(199, 100%, 38%, .04) 80%, transparent 100%)"
+          gradientThird="radial-gradient(50% 50% at 50% 50%, hsla(187, 100%, 32%, .10) 0, hsla(187, 100%, 28%, .03) 80%, transparent 100%)"
+          translateY={-260}
+          duration={9}
+          xOffset={70}
+        />
+
+        {/* Above Spotlight's own z-40 beams. */}
+        <div className="relative z-50 mx-auto grid max-w-[1280px] grid-cols-1 items-center gap-16 px-margin-mobile md:px-margin-desktop lg:grid-cols-2">
+          <div ref={heroCopyRef}>
             <LoadReveal
               as="span"
               variant="pop"
@@ -434,38 +669,51 @@ function ProductMain() {
             </LoadReveal>
           </div>
 
-          {/* Float starts only once the entrance below has settled (delay
-              matches LoadReveal's 220ms start + ~1.1s duration). */}
-          <div className="jj-float relative flex items-center justify-center" style={{ animationDelay: "1.3s" }}>
+          {/* Hero object — @react-three/drei.
+              This replaces the placeholder product shot that used to sit here.
+              IMAGES.hero is deliberately left defined: it is still the slot
+              waiting on the real studio photograph, and that shot belongs in a
+              product section rather than competing with the 3D object. */}
+          <div
+            ref={heroArtRef}
+            className="relative flex items-center justify-center"
+          >
+            {/* Brand glow behind the canvas, so the droplet sits in light
+                instead of floating on flat white. */}
+            <div
+              className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_60%_at_50%_42%,rgba(0,92,85,0.20),transparent_70%)]"
+              aria-hidden="true"
+            />
+
             <LoadReveal
               as="div"
               variant="image"
               delay={220}
-              className="relative w-full max-w-md"
+              className="relative w-full max-w-lg"
             >
-              <div className="jj-image-glow" aria-hidden="true" />
-              <TiltCard>
-                <MediaFrame
-                  src={IMAGES.hero.src}
-                  alt={IMAGES.hero.alt}
-                  label={IMAGES.hero.label}
-                  hint={IMAGES.hero.hint}
-                  priority
-                  sizes="(max-width: 1024px) 100vw, 480px"
-                  className="aspect-[4/5] w-full rounded-[40px] shadow-[0_40px_80px_-20px_rgba(0,92,85,0.4)]"
+              <TestKitScene
+                className="h-[24rem] w-full sm:h-[30rem] lg:h-[36rem]"
+                progress={heroKitProgress}
+                assemble
+              />
+
+              {/* Magic UI BorderBeam traces this card's edge — the detail that
+                  makes it read as an instrument readout rather than a div. */}
+              <div className="jj-glass relative -mt-6 overflow-hidden rounded-2xl p-5">
+                <p className="mb-1 font-body text-label-md uppercase tracking-widest text-primary">
+                  Result window
+                </p>
+                <p className="font-display text-body-lg font-bold text-on-surface">
+                  Colour shift readable by eye — no instrument required.
+                </p>
+                <BorderBeam
+                  size={55}
+                  duration={8}
+                  colorFrom="#0f766e"
+                  colorTo="#5bb8fe"
+                  borderWidth={1}
                 />
-                {/* Cinematic gradient so the glass card below stays legible
-                    and the image reads as lit rather than flat. */}
-                <div className="pointer-events-none absolute inset-0 rounded-[40px] bg-gradient-to-t from-black/60 via-black/5 to-transparent" />
-                <div className="jj-glass absolute right-4 bottom-6 left-4 rounded-2xl p-5">
-                  <p className="mb-1 font-body text-label-md uppercase tracking-widest text-primary">
-                    Result window
-                  </p>
-                  <p className="font-display text-body-lg font-bold text-on-surface">
-                    Colour shift readable by eye — no instrument required.
-                  </p>
-                </div>
-              </TiltCard>
+              </div>
             </LoadReveal>
           </div>
         </div>
@@ -486,17 +734,27 @@ function ProductMain() {
             </p>
           </Reveal>
 
-          <div className="grid grid-cols-1 gap-y-10 sm:grid-cols-2 md:grid-cols-4 md:gap-y-0">
-            {TRUST_MARKERS.map(({ icon: Icon, label, detail }, index) => (
-              <Reveal key={label} delay={index * 100}>
-                <div className="group flex items-center gap-4 md:justify-center md:border-l md:border-outline-variant/25 md:px-6 md:first:border-l-0">
+          {/* Magic UI Marquee. Four credentials is too few to fill the row on a
+              wide screen and too many to stack cleanly on a narrow one; as a
+              continuous ticker it reads well at every width. The edge mask is
+              what stops it looking like the items are being clipped. */}
+          <Reveal>
+            <Marquee
+              pauseOnHover
+              className="[--duration:38s] [--gap:3rem] [mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)]"
+            >
+              {TRUST_MARKERS.map(({ icon: Icon, label, detail }) => (
+                <div
+                  key={label}
+                  className="group flex items-center gap-4 px-6"
+                >
                   <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/10 to-transparent ring-1 ring-primary/10 transition-all duration-500 group-hover:-translate-y-0.5 group-hover:from-primary/20 group-hover:shadow-[0_10px_24px_rgba(0,92,85,0.18)] group-hover:ring-primary/30">
                     <Icon
                       sx={{ fontSize: 26 }}
                       className="text-primary/55 transition-colors duration-500 group-hover:text-primary"
                     />
                   </div>
-                  <div>
+                  <div className="whitespace-nowrap">
                     <div className="font-display text-body-lg font-bold tracking-tight text-on-surface">
                       {label}
                     </div>
@@ -505,9 +763,9 @@ function ProductMain() {
                     </div>
                   </div>
                 </div>
-              </Reveal>
-            ))}
-          </div>
+              ))}
+            </Marquee>
+          </Reveal>
         </div>
       </section>
 
@@ -644,10 +902,17 @@ function ProductMain() {
 
       <Simulator />
 
-      {/* Five-step process */}
-      <section id="how-it-works" className="scroll-mt-24 bg-surface py-24">
-        <div className="mx-auto max-w-[1280px] px-margin-mobile md:px-margin-desktop">
-          <Reveal className="mb-16 text-center">
+      {/* Five-step process. Pinned on desktop by the ScrollTrigger timeline
+          above, which lights each step up in turn; `min-h-screen` and the
+          centred content are what make the pinned frame look intentional
+          rather than like the page has jammed. */}
+      <section
+        id="how-it-works"
+        ref={processRef}
+        className="flex scroll-mt-24 items-center overflow-hidden bg-surface py-24 md:h-screen md:py-12"
+      >
+        <div className="mx-auto w-full max-w-[1280px] px-margin-mobile md:px-margin-desktop">
+          <Reveal className="mb-16 text-center md:mb-6">
             <h2 className="mb-4 font-display text-headline-lg text-on-surface">
               Five steps, one visit
             </h2>
@@ -656,28 +921,107 @@ function ProductMain() {
             </p>
           </Reveal>
 
-          <Reveal className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-5">
-            {PROCESS_STEPS.map(({ icon: Icon, title, body }, index) => (
-              <div
-                key={title}
-                className="group flex flex-col items-center text-center"
-              >
+          {/* Walkthrough stage. The canvas holds the frame while the copy
+              panels are stacked on top of one another in the same grid cell,
+              so only the active step is visible and nothing reflows as the
+              timeline cross-fades between them. */}
+          <div className="grid grid-cols-1 items-center gap-8 md:grid-cols-[1.1fr_0.9fr]">
+            <div className="relative">
+              <TestKitScene
+                className="h-[22rem] w-full sm:h-[26rem] md:h-[26rem] lg:h-[30rem]"
+                progress={walkProgress}
+                choreograph
+              />
+            </div>
+
+            {/* Desktop: cross-faded panels driven by the pinned timeline. */}
+            <div className="relative hidden min-h-[16rem] md:grid">
+              {PROCESS_STEPS.map(({ icon: Icon, title, body }, index) => (
                 <div
-                  className={`relative mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-surface-container-highest text-on-surface transition-all duration-500 group-hover:bg-primary group-hover:text-white ${
-                    index < PROCESS_STEPS.length - 1 ? "jj-step-line" : ""
-                  }`}
+                  key={title}
+                  data-step
+                  className="col-start-1 row-start-1 self-center"
                 >
-                  <Icon sx={{ fontSize: 30 }} />
+                  {/* Icon tile: a rotating conic halo behind a glass chip, so
+                      the icon reads as live instrumentation rather than a flat
+                      glyph. The halo only spins while its step is active. */}
+                  <div className="relative mb-6 h-20 w-20">
+                    <span
+                      data-step-halo
+                      aria-hidden="true"
+                      className="absolute -inset-1 rounded-[1.4rem] opacity-70 blur-[6px]"
+                      style={{
+                        background: `conic-gradient(from 0deg, ${STEP_ACCENTS[index].from}, ${STEP_ACCENTS[index].to}, ${STEP_ACCENTS[index].from})`,
+                      }}
+                    />
+                    <span
+                      aria-hidden="true"
+                      className="absolute inset-0 rounded-2xl"
+                      style={{
+                        background: `linear-gradient(140deg, ${STEP_ACCENTS[index].from}, ${STEP_ACCENTS[index].to})`,
+                      }}
+                    />
+                    <span
+                      data-step-icon
+                      className="absolute inset-[3px] flex items-center justify-center rounded-[0.85rem] bg-surface-container-lowest/90 backdrop-blur-sm"
+                    >
+                      <Icon
+                        sx={{ fontSize: 30 }}
+                        className={STEP_ACCENTS[index].text}
+                      />
+                    </span>
+                  </div>
+
+                  {/* Progress pips — which of the five you are on, at a glance. */}
+                  <div className="mb-3 flex items-center gap-2">
+                    {PROCESS_STEPS.map((pip, pipIndex) => (
+                      <span
+                        key={pip.title}
+                        className="h-1.5 rounded-full transition-all duration-500"
+                        style={{
+                          width: pipIndex === index ? "1.75rem" : "0.375rem",
+                          background:
+                            pipIndex === index
+                              ? STEP_ACCENTS[index].from
+                              : "var(--color-outline-variant)",
+                        }}
+                      />
+                    ))}
+                    <span className="ml-2 font-body text-label-md uppercase tracking-[0.3em] text-outline">
+                      {index + 1} / {PROCESS_STEPS.length}
+                    </span>
+                  </div>
+                  <h3 className="mb-3 font-display text-headline-md text-on-surface">
+                    {title}
+                  </h3>
+                  <p className="max-w-sm font-body text-body-lg text-on-surface-variant">
+                    {body}
+                  </p>
                 </div>
-                <h3 className="mb-2 font-display text-body-lg font-bold text-on-surface">
-                  {title}
-                </h3>
-                <p className="font-body text-body-sm text-on-surface-variant">
-                  {body}
-                </p>
-              </div>
-            ))}
-          </Reveal>
+              ))}
+            </div>
+
+            {/* Mobile: the original stacked list. Pinning five screens of
+                scroll on a phone would trap the viewport, so the walkthrough
+                degrades to the plain sequence it always was. */}
+            <ol className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:hidden">
+              {PROCESS_STEPS.map(({ icon: Icon, title, body }) => (
+                <li key={title} className="flex items-start gap-4">
+                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-surface-container-highest text-primary">
+                    <Icon sx={{ fontSize: 26 }} />
+                  </div>
+                  <div>
+                    <h3 className="mb-1 font-display text-body-lg font-bold text-on-surface">
+                      {title}
+                    </h3>
+                    <p className="font-body text-body-sm text-on-surface-variant">
+                      {body}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
         </div>
       </section>
 

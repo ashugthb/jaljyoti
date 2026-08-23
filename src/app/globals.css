@@ -703,6 +703,35 @@ body {
   }
 }
 
+/* ---------------------------------------------------------------------------
+   Magic UI — Marquee
+   Source: https://magicui.design/r/marquee.json (the registry item ships these
+   as `cssVars.theme` + `css`; in Tailwind v4 that is a @theme block plus the
+   raw keyframes). Copied verbatim so the component can be re-synced upstream.
+   --------------------------------------------------------------------------- */
+@theme {
+  --animate-marquee: marquee var(--duration) infinite linear;
+  --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(-100% - var(--gap)));
+  }
+}
+
+@keyframes marquee-vertical {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(calc(-100% - var(--gap)));
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .jj-reveal {
     opacity: 1;
@@ -749,5 +778,11 @@ body {
   .jj-tilt-card,
   .jj-magnetic {
     transition: none !important;
+  }
+
+  /* Library components added alongside the originals. */
+  .animate-marquee,
+  .animate-marquee-vertical {
+    animation: none !important;
   }
 }
