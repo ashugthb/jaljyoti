@@ -2,10 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
-import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
-import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-import CloseIcon from "@mui/icons-material/Close";
-import ZoomOutMapIcon from "@mui/icons-material/ZoomOutMap";
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  CloseIcon,
+  ExpandIcon,
+} from "@/components/icons";
 import AmbientBackground from "@/components/site/AmbientBackground";
 import { useGetStarted } from "@/components/site/GetStarted";
 import Reveal from "@/components/site/Reveal";
@@ -159,7 +161,7 @@ function Lightbox({ photo, index, total, onClose, onPrev, onNext }) {
           aria-label="Close image"
           className="rounded-full p-2 text-inverse-on-surface transition-colors hover:bg-white/10"
         >
-          <CloseIcon />
+          <CloseIcon size={22} />
         </button>
       </div>
 
@@ -170,7 +172,7 @@ function Lightbox({ photo, index, total, onClose, onPrev, onNext }) {
           aria-label="Previous image"
           className="absolute left-2 z-10 rounded-full bg-white/10 p-3 text-inverse-on-surface transition-colors hover:bg-white/20 md:left-8"
         >
-          <ArrowBackIosNewIcon sx={{ fontSize: 20 }} />
+          <ChevronLeftIcon size={20} />
         </button>
 
         <figure
@@ -201,7 +203,7 @@ function Lightbox({ photo, index, total, onClose, onPrev, onNext }) {
           aria-label="Next image"
           className="absolute right-2 z-10 rounded-full bg-white/10 p-3 text-inverse-on-surface transition-colors hover:bg-white/20 md:right-8"
         >
-          <ArrowForwardIosIcon sx={{ fontSize: 20 }} />
+          <ChevronRightIcon size={20} />
         </button>
       </div>
     </div>
@@ -237,7 +239,7 @@ function GalleryMain() {
   }, []);
 
   return (
-    <main className="pt-24 pb-24">
+    <main className="pt-[clamp(3.5rem,9vh,8rem)] pb-[clamp(3.5rem,9vh,8rem)]">
       <section className="relative mb-16">
         <AmbientBackground variant="subtle" />
         <div className="relative z-10 mx-auto max-w-[1280px] px-margin-mobile text-center md:px-margin-desktop">
@@ -325,7 +327,7 @@ function GalleryMain() {
                 </div>
 
                 <span className="absolute top-4 right-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/85 text-primary opacity-0 transition-all duration-500 group-hover:opacity-100">
-                  <ZoomOutMapIcon sx={{ fontSize: 18 }} />
+                  <ExpandIcon size={18} />
                 </span>
               </div>
             </button>

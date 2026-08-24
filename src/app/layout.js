@@ -2,7 +2,7 @@
 
 import { Geist, Geist_Mono, Manrope, Inter } from "next/font/google";
 import "./globals.css";
-import MuiProvider from "./MuiProvider"; // adjust the path if necessary
+import ToastProvider from "./ToastProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -43,7 +43,8 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${manrope.variable} ${inter.variable} antialiased`}
       >
-        <MuiProvider>{children}</MuiProvider>
+        {children}
+        <ToastProvider />
       </body>
     </html>
   );

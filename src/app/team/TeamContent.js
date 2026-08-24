@@ -2,9 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import CloseIcon from "@mui/icons-material/Close";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { CheckCircleIcon, ChevronDownIcon, CloseIcon } from "@/components/icons";
 import AmbientBackground from "@/components/site/AmbientBackground";
 import { useGetStarted } from "@/components/site/GetStarted";
 import Reveal from "@/components/site/Reveal";
@@ -21,7 +19,6 @@ const PORTRAITS = {
   meenu: "/Prof.MeenuChhabra.jpg",
   jyoti: "/Ms.JyotiGautam.jpg",
   sanjeet: "/sanjeet.jpg",
-  satyam: "/Asset.png",
 };
 
 /**
@@ -82,22 +79,6 @@ const TEAM = [
     links: [],
     publications: [],
   },
-  {
-    id: "satyam",
-    name: "Satyam Sharma",
-    role: "Sales / Marketing Lead",
-    image: PORTRAITS.satyam,
-    tags: ["Go-to-market", "Digital Marketing"],
-    bio: "Final-year B.Tech student in Computer Science at IIT Jodhpur, leading how Jaljyoti reaches the communities, schools, and institutions that need rapid water testing most.",
-    highlights: [
-      "B.Tech 4th year student at IIT Jodhpur.",
-      "Pursuing a major in Computer Science Engineering.",
-      "Experienced in sales and marketing strategies.",
-      "Skilled in digital marketing, customer engagement, and brand promotion.",
-    ],
-    links: [],
-    publications: [],
-  },
 ];
 
 /** Must match the `gap-gutter` (24px) used by the card grid. */
@@ -105,7 +86,9 @@ const GRID_GAP = 24;
 
 /**
  * Column count of the card grid, so the pointer under the expanded panel can be
- * centred on the card that opened it. Mirrors the sm/lg breakpoints below.
+ * centred on the card that opened it. These numbers must stay in step with the
+ * `sm:grid-cols-2 lg:grid-cols-3` on the grid itself — Tailwind needs literal
+ * class names, so the count cannot be derived from one place.
  */
 function useGridColumns() {
   const [columns, setColumns] = useState(1);
@@ -114,7 +97,7 @@ function useGridColumns() {
     const wide = window.matchMedia("(min-width: 1024px)");
     const medium = window.matchMedia("(min-width: 640px)");
 
-    const sync = () => setColumns(wide.matches ? 4 : medium.matches ? 2 : 1);
+    const sync = () => setColumns(wide.matches ? 3 : medium.matches ? 2 : 1);
     sync();
 
     wide.addEventListener("change", sync);
@@ -136,18 +119,16 @@ function TeamCard({ member, expanded, onToggle }) {
       aria-expanded={expanded}
       aria-controls="team-detail-panel"
       aria-label={`${expanded ? "Hide" : "Show"} the full profile of ${member.name}, ${member.role}`}
-      className={`group jj-card relative flex h-full cursor-pointer flex-col rounded-[24px] p-6 text-left transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary xl:p-8 ${
-        expanded
+      className={`group jj-card relative flex h-full cursor-pointer flex-col rounded-[24px] p-6 text-left transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary xl:p-8 ${expanded
           ? "-translate-y-2 shadow-[0_16px_40px_rgba(15,23,42,0.12)] ring-2 ring-primary"
           : "hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(15,23,42,0.08)]"
-      }`}
+        }`}
     >
       <div
-        className={`relative mx-auto mb-8 h-40 w-40 overflow-hidden rounded-full border-4 transition-all duration-500 xl:h-48 xl:w-48 ${
-          expanded
+        className={`relative mx-auto mb-8 h-40 w-40 overflow-hidden rounded-full border-4 transition-all duration-500 xl:h-48 xl:w-48 ${expanded
             ? "scale-105 border-primary"
             : "border-surface-container-high group-hover:scale-105"
-        }`}
+          }`}
       >
         {member.image ? (
           <Image
@@ -180,11 +161,10 @@ function TeamCard({ member, expanded, onToggle }) {
             screens (including wide tablets) they stay visible. Once a card is
             expanded its chips stay up regardless. */}
         <div
-          className={`flex min-h-14 flex-wrap content-start justify-center gap-2 transition-all duration-500 ${
-            expanded
+          className={`flex min-h-14 flex-wrap content-start justify-center gap-2 transition-all duration-500 ${expanded
               ? "translate-y-0 opacity-100"
               : "md:[@media(hover:hover)]:translate-y-2 md:[@media(hover:hover)]:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100 md:group-focus-visible:translate-y-0 md:group-focus-visible:opacity-100"
-          }`}
+            }`}
         >
           {member.tags.map((tag) => (
             <span
@@ -197,13 +177,12 @@ function TeamCard({ member, expanded, onToggle }) {
         </div>
 
         <span
-          className={`mt-4 inline-flex items-center gap-1 font-body text-body-sm transition-colors ${
-            expanded ? "text-primary" : "text-outline group-hover:text-primary"
-          }`}
+          className={`mt-4 inline-flex items-center gap-1 font-body text-body-sm transition-colors ${expanded ? "text-primary" : "text-outline group-hover:text-primary"
+            }`}
         >
           {expanded ? "Hide profile" : "Read profile"}
-          <ExpandMoreIcon
-            sx={{ fontSize: 18 }}
+          <ChevronDownIcon
+            size={18}
             className={`transition-transform duration-500 ${expanded ? "rotate-180" : ""}`}
           />
         </span>
@@ -249,7 +228,7 @@ function DetailPanel({ member, onClose, onEnquire }) {
           aria-label={`Close ${member.name}'s profile`}
           className="rounded-full p-2 text-on-surface-variant transition-colors hover:bg-surface-container"
         >
-          <CloseIcon />
+          <CloseIcon size={22} />
         </button>
       </div>
 
@@ -275,8 +254,9 @@ function DetailPanel({ member, onClose, onEnquire }) {
                 className="jj-fade-up flex items-start gap-3 rounded-xl border border-outline-variant/30 bg-surface-container-lowest p-4"
                 style={{ animationDelay: `${160 + index * 60}ms` }}
               >
-                <CheckCircleOutlineIcon
-                  sx={{ fontSize: 20 }}
+                <CheckCircleIcon
+                  size={20}
+                  play="always"
                   className="mt-0.5 shrink-0 text-primary"
                 />
                 <span className="font-body text-body-sm text-on-surface-variant">
@@ -391,12 +371,11 @@ function TeamMain() {
   const pointerLeft =
     activeIndex < 0 || columns === 1
       ? "50%"
-      : `calc((100% - ${(columns - 1) * GRID_GAP}px) / ${columns} * ${column + 0.5} + ${
-          column * GRID_GAP
-        }px)`;
+      : `calc((100% - ${(columns - 1) * GRID_GAP}px) / ${columns} * ${column + 0.5} + ${column * GRID_GAP
+      }px)`;
 
   return (
-    <main className="pt-24 pb-24">
+    <main className="pt-[clamp(3.5rem,9vh,8rem)] pb-[clamp(3.5rem,9vh,8rem)]">
       <section className="relative mb-20">
         <AmbientBackground variant="subtle" />
         <div className="relative z-10 mx-auto max-w-[1280px] px-margin-mobile text-center md:px-margin-desktop">
@@ -419,7 +398,7 @@ function TeamMain() {
       </section>
 
       <section className="mx-auto max-w-[1280px] px-margin-mobile md:px-margin-desktop">
-        <div className="grid grid-cols-1 gap-gutter sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-gutter sm:grid-cols-2 lg:grid-cols-3">
           {TEAM.map((entry, index) => (
             <Reveal key={entry.id} delay={index * 80} className="h-full">
               <TeamCard
@@ -439,16 +418,14 @@ function TeamMain() {
           role="region"
           aria-live="polite"
           aria-label="Selected profile"
-          className={`relative grid transition-[grid-template-rows,margin] duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] ${
-            isOpen ? "mt-8 grid-rows-[1fr]" : "mt-0 grid-rows-[0fr]"
-          }`}
+          className={`relative grid transition-[grid-template-rows,margin] duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] ${isOpen ? "mt-8 grid-rows-[1fr]" : "mt-0 grid-rows-[0fr]"
+            }`}
         >
           {/* Pointer sits under whichever card is open */}
           <div
             aria-hidden="true"
-            className={`pointer-events-none absolute -top-3 h-4 w-8 -translate-x-1/2 transition-all duration-500 ${
-              isOpen ? "opacity-100" : "opacity-0"
-            }`}
+            className={`pointer-events-none absolute -top-3 h-4 w-8 -translate-x-1/2 transition-all duration-500 ${isOpen ? "opacity-100" : "opacity-0"
+              }`}
             style={{ left: pointerLeft }}
           >
             <div className="mx-auto h-4 w-4 origin-center rotate-45 rounded-[3px] border-t border-l border-[#e2e8f0] bg-white" />

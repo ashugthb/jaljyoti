@@ -786,3 +786,696 @@ body {
     animation: none !important;
   }
 }
+
+/* ===========================================================================
+   Animated icon system — src/components/icons/*
+   ---------------------------------------------------------------------------
+   37 stroke-drawn 24x24 icons whose motion lives entirely here. Two rules make
+   the whole set work:
+
+   1. Every animated part declares its own `--jj-anim` but does NOT run it. A
+      single trigger block below switches them all on, so adding an icon means
+      adding one custom-property line, not another hover selector.
+   2. Every looping keyframe starts *and* ends on the part's resting style, so
+      moving the pointer on or off an icon never produces a visual snap.
+
+   Naming: `jj-ia-*` = an animated part, `jj-ik-*` = its keyframes,
+   `jj-im-*` = a state morph driven by transition rather than animation.
+   =========================================================================== */
+
+.jj-i {
+  display: inline-block;
+  vertical-align: middle;
+  flex: none;
+  /* Ripples, sparkles and smoke deliberately overrun the 24x24 grid. */
+  overflow: visible;
+}
+
+/* Parts rotate/scale about their own centre unless they override it below. */
+.jj-i [class*="jj-ia-"] {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* --- The one trigger ------------------------------------------------------
+   Hovering (or keyboard-focusing) the icon or any `.group` ancestor plays it;
+   `data-play="always"` never stops — for live indicators and loaders;
+   `data-play="view"` waits for the surrounding <Reveal> to report itself on
+   screen, reusing the observer that is already running for the copy. */
+.jj-i:hover [class*="jj-ia-"],
+.jj-i:focus-visible [class*="jj-ia-"],
+.group:hover .jj-i [class*="jj-ia-"],
+.group:focus-visible .jj-i [class*="jj-ia-"],
+.jj-i[data-play="always"] [class*="jj-ia-"],
+[data-revealed="true"] .jj-i[data-play="view"] [class*="jj-ia-"],
+[data-shown="true"] .jj-i[data-play="view"] [class*="jj-ia-"] {
+  animation: var(--jj-anim);
+}
+
+/* --- Stroke drawing ------------------------------------------------------
+   `pathLength="1"` on the markup normalises every path to a length of 1, so a
+   single dasharray works for a 9px tick and a full shield outline alike. */
+.jj-ia-draw,
+.jj-ia-draw-late,
+.jj-ia-trace {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+
+.jj-ia-draw {
+  --jj-anim: jj-ik-draw 0.9s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* Holds itself hidden through the delay (`backwards`) so the tick lands after
+   the ring it sits inside, instead of racing it. */
+.jj-ia-draw-late {
+  --jj-anim: jj-ik-draw 0.55s cubic-bezier(0.65, 0, 0.35, 1) 0.38s backwards;
+}
+
+.jj-ia-trace {
+  --jj-anim: jj-ik-trace 2.2s linear infinite;
+}
+
+@keyframes jj-ik-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes jj-ik-trace {
+  0% {
+    stroke-dashoffset: 1;
+  }
+  65%,
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* --- Water: droplets, ripples, bubbles, falling drops --------------------- */
+.jj-ia-glint {
+  opacity: 0.5;
+  --jj-anim: jj-ik-glint 2s ease-in-out infinite;
+}
+
+.jj-ia-ripple {
+  opacity: 0.3;
+  --jj-anim: jj-ik-ripple 2.2s ease-out infinite;
+}
+
+.jj-ia-fall {
+  opacity: 0;
+  --jj-anim: jj-ik-fall 1.7s ease-in infinite;
+}
+
+.jj-ia-bubble-1 {
+  opacity: 0;
+  --jj-anim: jj-ik-bubble 2s ease-in-out infinite;
+}
+
+.jj-ia-bubble-2 {
+  opacity: 0;
+  --jj-anim: jj-ik-bubble 2s ease-in-out 0.7s infinite;
+}
+
+@keyframes jj-ik-glint {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes jj-ik-ripple {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+  55% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+
+@keyframes jj-ik-fall {
+  0% {
+    opacity: 0;
+    transform: translateY(-3px) scale(0.7);
+  }
+  22% {
+    opacity: 1;
+    transform: translateY(-1px) scale(1);
+  }
+  78% {
+    opacity: 1;
+    transform: translateY(2px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(3.5px) scale(0.9);
+  }
+}
+
+@keyframes jj-ik-bubble {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0.6);
+  }
+  28% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-5px) scale(1);
+  }
+}
+
+/* --- Test strip: reagent bands developing in sequence --------------------- */
+.jj-ia-band-1,
+.jj-ia-band-2,
+.jj-ia-band-3 {
+  transform-box: view-box;
+  opacity: 0.35;
+}
+
+.jj-ia-band-1 {
+  transform-origin: 12px 5.6px;
+  --jj-anim: jj-ik-band 1.8s ease-in-out infinite;
+}
+
+.jj-ia-band-2 {
+  transform-origin: 12px 8.6px;
+  --jj-anim: jj-ik-band 1.8s ease-in-out 0.18s infinite;
+}
+
+.jj-ia-band-3 {
+  transform-origin: 12px 11.6px;
+  --jj-anim: jj-ik-band 1.8s ease-in-out 0.36s infinite;
+}
+
+@keyframes jj-ik-band {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scaleX(1);
+  }
+  45% {
+    opacity: 1;
+    transform: scaleX(1.25);
+  }
+}
+
+/* --- DNA: rungs cinching in sequence, which reads as the helix turning ---- */
+.jj-ia-rung-1,
+.jj-ia-rung-2,
+.jj-ia-rung-3,
+.jj-ia-rung-4 {
+  transform-box: view-box;
+  opacity: 0.4;
+}
+
+.jj-ia-rung-1 {
+  transform-origin: 12px 4.4px;
+  --jj-anim: jj-ik-rung 1.7s ease-in-out infinite;
+}
+
+.jj-ia-rung-2 {
+  transform-origin: 12px 9.5px;
+  --jj-anim: jj-ik-rung 1.7s ease-in-out 0.14s infinite;
+}
+
+.jj-ia-rung-3 {
+  transform-origin: 12px 14.5px;
+  --jj-anim: jj-ik-rung 1.7s ease-in-out 0.28s infinite;
+}
+
+.jj-ia-rung-4 {
+  transform-origin: 12px 19.6px;
+  --jj-anim: jj-ik-rung 1.7s ease-in-out 0.42s infinite;
+}
+
+@keyframes jj-ik-rung {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scaleX(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scaleX(0.72);
+  }
+}
+
+/* --- Rotation: timer sweep, orbital shells, loader, clock hands ----------- */
+.jj-ia-sweep,
+.jj-ia-orbit,
+.jj-ia-spin,
+.jj-ia-hand-minute,
+.jj-ia-hand-hour,
+.jj-ia-wobble,
+.jj-ia-rotate-in {
+  transform-box: view-box;
+  transform-origin: 12px 12px;
+}
+
+.jj-ia-sweep {
+  transform-origin: 12px 13.6px;
+  --jj-anim: jj-ik-spin 2.6s linear infinite;
+}
+
+.jj-ia-orbit {
+  --jj-anim: jj-ik-spin 9s linear infinite;
+}
+
+.jj-ia-spin {
+  --jj-anim: jj-ik-spin 0.8s linear infinite;
+}
+
+.jj-ia-hand-minute {
+  --jj-anim: jj-ik-spin 3.2s steps(12, end) infinite;
+}
+
+.jj-ia-hand-hour {
+  --jj-anim: jj-ik-spin 12s steps(12, end) infinite;
+}
+
+.jj-ia-wobble {
+  --jj-anim: jj-ik-wobble 3s ease-in-out infinite;
+}
+
+.jj-ia-rotate-in {
+  --jj-anim: jj-ik-rotate-in 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes jj-ik-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes jj-ik-wobble {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  33% {
+    transform: rotate(7deg);
+  }
+  66% {
+    transform: rotate(-7deg);
+  }
+}
+
+@keyframes jj-ik-rotate-in {
+  from {
+    transform: rotate(-90deg) scale(0.7);
+  }
+  to {
+    transform: rotate(0deg) scale(1);
+  }
+}
+
+/* --- Microbe nuclei, microscope scan, leaf sway -------------------------- */
+.jj-ia-nucleus-1 {
+  --jj-anim: jj-ik-pulse 1.9s ease-in-out infinite;
+}
+
+.jj-ia-nucleus-2 {
+  --jj-anim: jj-ik-pulse 1.9s ease-in-out 0.5s infinite;
+}
+
+.jj-ia-scan {
+  opacity: 0;
+  --jj-anim: jj-ik-scan 2s ease-in-out infinite;
+}
+
+.jj-ia-sway {
+  transform-box: view-box;
+  transform-origin: 5px 19.4px;
+  --jj-anim: jj-ik-sway 3.4s ease-in-out infinite;
+}
+
+@keyframes jj-ik-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.35);
+    opacity: 0.6;
+  }
+}
+
+@keyframes jj-ik-scan {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translateY(-1.6px);
+  }
+  50% {
+    opacity: 0.9;
+    transform: translateY(1.6px);
+  }
+}
+
+@keyframes jj-ik-sway {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-5deg);
+  }
+}
+
+/* --- Alert rings. Two rest opacities, so two keyframe sets — otherwise the
+       ring would jump to a different alpha the moment the animation starts. -- */
+.jj-ia-wave-1 {
+  opacity: 0.55;
+  --jj-anim: jj-ik-wave-a 2s ease-out infinite;
+}
+
+.jj-ia-wave-2 {
+  opacity: 0.35;
+  --jj-anim: jj-ik-wave-b 2s ease-out 0.45s infinite;
+}
+
+@keyframes jj-ik-wave-a {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scale(1.18);
+    opacity: 0.08;
+  }
+}
+
+@keyframes jj-ik-wave-b {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.35;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.05;
+  }
+}
+
+/* --- Blink, twinkle, pop ------------------------------------------------- */
+.jj-ia-blink {
+  --jj-anim: jj-ik-blink 1.1s steps(1, end) infinite;
+}
+
+.jj-ia-twinkle {
+  opacity: 0.45;
+  --jj-anim: jj-ik-twinkle 1.8s ease-in-out infinite;
+}
+
+.jj-ia-pop,
+.jj-ia-pop-1 {
+  --jj-anim: jj-ik-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.jj-ia-pop-2 {
+  --jj-anim: jj-ik-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.12s backwards;
+}
+
+@keyframes jj-ik-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+
+@keyframes jj-ik-twinkle {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(0.85) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15) rotate(15deg);
+  }
+}
+
+@keyframes jj-ik-pop {
+  0% {
+    transform: scale(0.8);
+  }
+  60% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* --- Directional nudges on controls -------------------------------------- */
+.jj-ia-nudge-x {
+  --jj-anim: jj-ik-nudge-x 1s ease-in-out infinite;
+}
+
+.jj-ia-nudge-left {
+  --jj-anim: jj-ik-nudge-left 1s ease-in-out infinite;
+}
+
+.jj-ia-nudge-up {
+  --jj-anim: jj-ik-nudge-up 1s ease-in-out infinite;
+}
+
+.jj-ia-nudge-down {
+  --jj-anim: jj-ik-nudge-down 1s ease-in-out infinite;
+}
+
+@keyframes jj-ik-nudge-x {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(2.4px);
+  }
+}
+
+@keyframes jj-ik-nudge-left {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-2.4px);
+  }
+}
+
+@keyframes jj-ik-nudge-up {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2.4px);
+  }
+}
+
+@keyframes jj-ik-nudge-down {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(2.4px);
+  }
+}
+
+/* --- Expand: the four corners push outward ------------------------------- */
+.jj-ia-corner-tl {
+  --jj-anim: jj-ik-corner-tl 1s ease-in-out infinite;
+}
+
+.jj-ia-corner-tr {
+  --jj-anim: jj-ik-corner-tr 1s ease-in-out infinite;
+}
+
+.jj-ia-corner-br {
+  --jj-anim: jj-ik-corner-br 1s ease-in-out infinite;
+}
+
+.jj-ia-corner-bl {
+  --jj-anim: jj-ik-corner-bl 1s ease-in-out infinite;
+}
+
+@keyframes jj-ik-corner-tl {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(-1.5px, -1.5px);
+  }
+}
+
+@keyframes jj-ik-corner-tr {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(1.5px, -1.5px);
+  }
+}
+
+@keyframes jj-ik-corner-br {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(1.5px, 1.5px);
+  }
+}
+
+@keyframes jj-ik-corner-bl {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(-1.5px, 1.5px);
+  }
+}
+
+/* --- Contact set: envelope flap, pin drop, tassel, smokestack ------------- */
+.jj-ia-flap {
+  transform-box: view-box;
+  transform-origin: 12px 6.4px;
+  --jj-anim: jj-ik-flap 1.7s ease-in-out infinite;
+}
+
+.jj-ia-drop-in {
+  transform-box: view-box;
+  transform-origin: 12px 21.2px;
+  --jj-anim: jj-ik-drop-in 1.8s ease-in-out infinite;
+}
+
+.jj-ia-tassel {
+  transform-box: view-box;
+  transform-origin: 21.4px 8.6px;
+  --jj-anim: jj-ik-tassel 2.4s ease-in-out infinite;
+}
+
+.jj-ia-smoke-1 {
+  opacity: 0;
+  --jj-anim: jj-ik-smoke 2.6s ease-out infinite;
+}
+
+.jj-ia-smoke-2 {
+  opacity: 0;
+  --jj-anim: jj-ik-smoke 2.6s ease-out 0.9s infinite;
+}
+
+@keyframes jj-ik-flap {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(-0.55);
+  }
+}
+
+@keyframes jj-ik-drop-in {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  45% {
+    transform: translateY(-2.5px);
+  }
+}
+
+@keyframes jj-ik-tassel {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  30% {
+    transform: rotate(11deg);
+  }
+  65% {
+    transform: rotate(-8deg);
+  }
+}
+
+@keyframes jj-ik-smoke {
+  0% {
+    opacity: 0;
+    transform: translateY(2px) scale(0.6);
+  }
+  30% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-3.5px) scale(1.25);
+  }
+}
+
+/* --- Hamburger -> close. A state morph, not a keyframe, so it tracks the
+       menu's open state in both directions instead of replaying. ----------- */
+.jj-im-bar-top,
+.jj-im-bar-mid,
+.jj-im-bar-bottom {
+  transform-box: view-box;
+  transition:
+    transform 0.32s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.2s ease;
+}
+
+.jj-im-bar-top {
+  transform-origin: 12px 6.8px;
+}
+
+.jj-im-bar-mid {
+  transform-origin: 12px 12px;
+}
+
+.jj-im-bar-bottom {
+  transform-origin: 12px 17.2px;
+}
+
+.jj-i[data-open="true"] .jj-im-bar-top {
+  transform: translateY(5.2px) rotate(45deg);
+}
+
+.jj-i[data-open="true"] .jj-im-bar-mid {
+  opacity: 0;
+  transform: scaleX(0.3);
+}
+
+.jj-i[data-open="true"] .jj-im-bar-bottom {
+  transform: translateY(-5.2px) rotate(-45deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jj-i [class*="jj-ia-"] {
+    animation: none !important;
+  }
+
+  .jj-i [class*="jj-im-"] {
+    transition: none !important;
+  }
+}

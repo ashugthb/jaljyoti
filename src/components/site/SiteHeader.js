@@ -3,8 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import CloseIcon from "@mui/icons-material/Close";
-import MenuIcon from "@mui/icons-material/Menu";
+import { MenuIcon } from "@/components/icons";
 import { useGetStarted } from "./GetStarted";
 import { COMPANY, NAV_LINKS } from "./siteMeta";
 
@@ -131,7 +130,9 @@ export default function SiteHeader({ active }) {
             onClick={() => setMenuOpen((open) => !open)}
             className="rounded-full p-2 text-on-surface-variant transition-colors hover:bg-surface-container md:hidden"
           >
-            {menuOpen ? <CloseIcon /> : <MenuIcon />}
+            {/* One icon that morphs between the two states — a hamburger
+                cross-fading into an X reads as a glitch at this size. */}
+            <MenuIcon open={menuOpen} size={24} />
           </button>
         </div>
       </div>

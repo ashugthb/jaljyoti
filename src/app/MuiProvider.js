@@ -1,53 +1,49 @@
-// components/MuiProvider.js
+// app/MuiProvider.js
 "use client";
 
-import dynamic from "next/dynamic";
+import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-import "react-toastify/dist/ReactToastify.css";
 
-// react-toastify's container mounts real DOM only on the client (there's
-// nothing to toast during a server render), so its SSR output and first
-// client render never match — a guaranteed hydration mismatch. Disabling SSR
-// for it entirely sidesteps the mismatch instead of masking it.
-const ToastContainer = dynamic(
-  () => import("react-toastify").then((mod) => mod.ToastContainer),
-  { ssr: false }
-);
-
-// Create your theme on the client side
+/**
+ * MUI + Emotion, scoped to the routes that still use them (/classic and
+ * /admin-dashboard).
+ *
+ * Two things here are load-bearing for hydration:
+ *
+ * 1. AppRouterCacheProvider. Without it, Emotion serialises its <style> tags
+ *    inline wherever the component happened to render during SSR, while on the
+ *    client it inserts them into <head>. React then finds a <style> where it
+ *    expected the next element and throws the whole tree away
+ *    ("server rendered HTML didn't match the client"). The provider routes the
+ *    styles through useServerInsertedHTML so both passes agree.
+ *
+ * 2. This is no longer mounted at the root. The design-system routes (/, /team,
+ *    /gallery) contain no MUI at all now that the icons are our own, so keeping
+ *    a theme + CssBaseline above them only shipped Emotion to pages that never
+ *    used it — and put the mismatch on every route.
+ */
 const theme = createTheme({
-    palette: {
-        primary: {
-            main: '#00695C',
-        },
-        secondary: {
-            main: '#FF9800',
-        },
-    },
-    typography: {
-        fontFamily: 'var(--font-geist-sans)',
-        h4: {
-            fontWeight: 700,
-        },
-    },
-    breakpoints: {
-        values: {
-            xs: 0,
-            sm: 600,
-            md: 900,
-            lg: 1200,
-            xl: 1536,
-        },
-    },
+  palette: {
+    primary: { main: "#00695C" },
+    secondary: { main: "#FF9800" },
+  },
+  typography: {
+    fontFamily: "var(--font-geist-sans)",
+    h4: { fontWeight: 700 },
+  },
+  breakpoints: {
+    values: { xs: 0, sm: 600, md: 900, lg: 1200, xl: 1536 },
+  },
 });
 
 export default function MuiProvider({ children }) {
-    return (
-        <ThemeProvider theme={theme}>
-            <CssBaseline />
-            <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} />
-            {children}
-        </ThemeProvider>
-    );
+  return (
+    <AppRouterCacheProvider options={{ key: "mui" }}>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        {children}
+      </ThemeProvider>
+    </AppRouterCacheProvider>
+  );
 }

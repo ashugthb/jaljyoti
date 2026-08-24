@@ -1,6 +1,13 @@
 "use client";
 
-import { Suspense, useLayoutEffect, useMemo, useRef } from "react";
+import {
+  Suspense,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import gsap from "gsap";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import {
@@ -36,12 +43,26 @@ const PAPER = "#f6f4ec";
 
 const CHART_SWATCHES = ["#9cf2e8", "#5bb8fe", "#ffb84d", "#e2574c"];
 
+/**
+ * Camera waypoints.
+ *
+ * The rule here is one focal length. The previous set ran from 6.2 units out to
+ * 2.4 — the subject more than doubled in size between beats, which is a zoom,
+ * and a zoom on every step is what makes a product film look like a slideshow.
+ * Every waypoint below sits 4.75-4.89 from its own target: a 3% spread, i.e. a
+ * locked lens. The camera arcs around the kit and tilts to follow the action,
+ * and the subject stays the same size throughout.
+ *
+ * Targets rise and fall with what is happening — up to the mouth for the pour
+ * and the dip, back down for the wait, across for the comparison. That is a pan
+ * and tilt on a fixed lens, which is what an operator would actually do.
+ */
 const WAYPOINTS = [
-  { position: [0, 0.35, 6.2], target: [0, 0, 0] },
-  { position: [1.5, 1.5, 3.4], target: [0, 0.85, 0] },
-  { position: [-1.5, 0.55, 2.9], target: [-0.15, 0.15, 0] },
-  { position: [0.5, -0.35, 2.4], target: [0, -0.45, 0] },
-  { position: [2.4, 0.25, 3.4], target: [1.55, -0.15, 0] },
+  { position: [0.25, 0.62, 4.86], target: [0, 0.1, 0] },
+  { position: [1.15, 1.32, 4.62], target: [0, 0.82, 0] },
+  { position: [0.4, 1.12, 4.74], target: [0, 0.68, 0] },
+  { position: [-1.0, 0.56, 4.72], target: [0, 0.12, 0] },
+  { position: [1.6, 0.34, 4.66], target: [0.82, -0.12, 0] },
 ];
 
 /**
@@ -73,6 +94,18 @@ const ASSEMBLY = [
   { key: "swatch2", from: [3.2, 0.7, 1.5], spin: [1.1, -1.7, 0.6], at: 1.82, swing: 0.75 },
   { key: "swatch3", from: [3.4, -0.1, 1.7], spin: [-1.6, 1.1, -0.7], at: 1.9, swing: 0.75 },
 ];
+
+/**
+ * Hero showcase timing, in seconds.
+ *
+ * RECON_END is where the rebuild is finished — the last ASSEMBLY entry starts
+ * at 1.9 and its rotation tail runs 2.1 — so 4.2 leaves a beat before the
+ * walkthrough takes the parts over.
+ */
+const RECON_END = 4.2;
+const SHOWCASE_DURATION = 9.5;
+const SHOWCASE_HOLD = 1;
+const LOOP_GAP = 4;
 
 function Vial({ reg }) {
   return (
@@ -157,6 +190,59 @@ function Vial({ reg }) {
             color={TEAL_BRIGHT}
             roughness={0.5}
             metalness={0.1}
+          />
+        </mesh>
+      </group>
+
+      {/*
+        The pour. Both of these are authored at the pose they hold mid-pour and
+        start hidden — Choreography is the only thing that reveals them, so the
+        hero (which runs the reconstruction but not the walkthrough) never sees
+        them, and they are deliberately absent from ASSEMBLY for the same reason.
+
+        The vial mouth is the top rim of the body cylinder: y = +1, centred on
+        the origin with an inner radius of 0.42. Every number below is placed
+        against that, so the stream lands inside the mouth rather than near it.
+      */}
+      <group
+        ref={(n) => reg("ampoule", n)}
+        position={[0.35, 1.87, 0.08]}
+        rotation={[0, 0, 2.4]}
+        visible={false}
+      >
+        <mesh>
+          <cylinderGeometry args={[0.13, 0.16, 0.52, 32]} />
+          <meshPhysicalMaterial
+            color="#dbeeea"
+            roughness={0.14}
+            transmission={0.9}
+            thickness={0.18}
+            ior={1.5}
+            attenuationColor={AQUA}
+            attenuationDistance={0.9}
+            transparent
+          />
+        </mesh>
+        <mesh position={[0, 0.33, 0]}>
+          <cylinderGeometry args={[0.052, 0.088, 0.19, 24]} />
+          <meshStandardMaterial color={TEAL} roughness={0.42} metalness={0.1} />
+        </mesh>
+      </group>
+
+      {/* Stream: spans y 0.82 -> 1.58, i.e. from the ampoule's lip down through
+          the mouth. Scaled from its top edge so it reads as falling liquid. */}
+      <group ref={(n) => reg("pourStream", n)} position={[0.12, 1.2, 0]} visible={false}>
+        <mesh>
+          <cylinderGeometry args={[0.045, 0.075, 0.76, 24, 1, true]} />
+          <meshPhysicalMaterial
+            color={TEAL_BRIGHT}
+            roughness={0.08}
+            transmission={0.86}
+            thickness={0.25}
+            ior={1.333}
+            attenuationColor={AQUA}
+            attenuationDistance={0.5}
+            transparent
           />
         </mesh>
       </group>
@@ -250,12 +336,26 @@ function CameraRig({ progress, still, introOffset }) {
     }
 
     if (!still) {
-      targetPosition.x += state.pointer.x * 0.22;
-      targetPosition.y += state.pointer.y * 0.14;
+      // Parallax, halved. At the old amplitude the pointer was moving the
+      // camera further than some of the authored beats did, which fought the
+      // choreography for attention.
+      targetPosition.x += state.pointer.x * 0.11;
+      targetPosition.y += state.pointer.y * 0.07;
     }
 
-    damp3(camera.position, targetPosition, 0.28, delta);
-    damp3(smoothedLook, lookTarget, 0.28, delta);
+    /**
+     * Smoothing constant, deliberately short.
+     *
+     * The intro's camera shots are already eased by GSAP. Smoothing that result
+     * again with a long time constant double-eases it: the timeline finishes,
+     * but the camera is still a visible distance behind its target and carries
+     * on drifting for most of a second — so the frame the animation ends on and
+     * the frame it finally rests on are not the same picture. The damper only
+     * has to soften the seams between shots and the pointer parallax, so it is
+     * tight enough to have effectively arrived when the timeline ends.
+     */
+    damp3(camera.position, targetPosition, 0.12, delta);
+    damp3(smoothedLook, lookTarget, 0.12, delta);
     camera.lookAt(smoothedLook);
   });
 
@@ -270,6 +370,14 @@ function phase(stepPos, a, b) {
   return t * t * (3 - 2 * t);
 }
 
+const mix = (a, b, t) => a + (b - a) * t;
+
+/** Smoothstepped 0→1, for sub-phases carved out of a `phase` result. */
+const ease = (v) => {
+  const t = clamp01(v);
+  return t * t * (3 - 2 * t);
+};
+
 const CLEAR_WATER = new Color("#e8f6f3");
 const REAGENT_TEAL = new Color(TEAL_BRIGHT);
 const PAD_BLANK = new Color("#eceade");
@@ -279,62 +387,132 @@ const PAD_ALERT = new Color("#e2574c");
 /**
  * Step choreography — the product actually performing the five steps.
  *
- * Moving the camera around a static object explains nothing: "Dip" has to dip,
- * "Wait" has to visibly react, "Compare" has to sit the strip against the
- * chart. This reads the same scrubbed `progress` the camera uses and drives the
- * model's state from it, so the geometry and the copy always agree.
+ * Moving a camera around a static object explains nothing, and neither does a
+ * vessel that fills itself. Every beat here is staged against the vial's real
+ * geometry: the mouth is the top rim of the body cylinder at y = +1, centred on
+ * the origin with an inner radius of 0.42, and the liquid surface sits at
+ * y = -0.975 + level * 1.05.
  *
- *   0 Collect      empty vessel, clear sample
- *   1 Add reagent  liquid fills from the base, colour turns from water to teal
- *   2 Dip          the strip travels from beside the vial down into the liquid
- *   3 Wait         the indicator pads develop, blank → safe → alert
- *   4 Compare      the strip lifts out and parks against the chart, and the
- *                  swatch it matches scales up
+ *   0 Collect      the sample sits in the vial, clear, capped
+ *   1 Add reagent  the cap lifts away, an ampoule tips over the open mouth and
+ *                  a stream runs into it — the level rises and the colour turns
+ *                  from water to teal *because* something was poured in
+ *   2 Dip          the strip tracks across to the vial's centre line, comes
+ *                  upright, and descends through the open mouth into the liquid
+ *   3 Wait         the indicator pads develop, blank -> safe -> alert
+ *   4 Compare      the strip rises clear of the mouth before it travels, then
+ *                  parks against the chart and the matching swatch answers
  *
- * Everything is written relative to the transform cached by the reconstruction
- * effect, so the two never fight over what "home" means.
+ * The order matters physically: the cap is off before anything enters the vial,
+ * and the strip never passes through geometry that is still in the way.
  */
-function Choreography({ parts, progress }) {
+function Choreography({ parts, progress, gate }) {
   useFrame(() => {
+    // The reconstruction and this both write position/rotation on the caps, the
+    // reagent, the meniscus and the swatches. Running them on the same frame
+    // means whichever lands last wins, and the rebuild visibly loses. The gate
+    // is closed for the whole rebuild and opens once the kit is assembled, so
+    // the two never contend for a part.
+    if (gate && !gate.active) return;
     const registry = parts.current;
     const t = clamp01(progress?.current?.value ?? 0);
     const stepPos = t * (WAYPOINTS.length - 1);
 
-    const fill = phase(stepPos, 0.15, 1.0);
-    const dip = phase(stepPos, 1.2, 2.0);
-    const react = phase(stepPos, 2.05, 3.0);
-    const lift = phase(stepPos, 3.1, 4.0);
+    const capLift = phase(stepPos, 0.35, 0.85);
+    const pourIn = phase(stepPos, 0.72, 1.0);
+    const pourFlow = phase(stepPos, 0.92, 1.42);
+    const pourOut = phase(stepPos, 1.42, 1.7);
+    const fill = phase(stepPos, 0.95, 1.5);
+    // The dip is three separated moves, not one blended one. The strip rests
+    // beside the vial with its tip at y = -0.70, which is 1.7 below the rim, so
+    // anything that starts travelling sideways before it has cleared the rim
+    // drives the strip straight through the glass wall. Rise, then cross, then
+    // descend — and the windows do not overlap.
+    const raise = phase(stepPos, 1.32, 1.92);
+    const across = phase(stepPos, 1.88, 2.28);
+    const down = phase(stepPos, 2.34, 2.85);
+    const react = phase(stepPos, 2.6, 3.55);
+    const lift = phase(stepPos, 3.6, 4.0);
 
-    // --- 1. Reagent fills the vial from the base upward --------------------
+    // --- 1. The cap comes off first ---------------------------------------
+    // Nothing may enter the vial until this has cleared the mouth, so it runs
+    // ahead of the pour and stays out of the way for the rest of the sequence.
+    for (const key of ["capTop", "capRing"]) {
+      const cap = registry[key];
+      const capHome = cap?.userData.homeTransform;
+      if (!cap || !capHome) continue;
+      // Arc up and back over the shoulder rather than sliding sideways, so it
+      // reads as lifted off a thread instead of dissolving.
+      const arc = Math.sin(capLift * Math.PI) * 0.4;
+      cap.position.x = mix(capHome.position.x, 0.85, capLift);
+      cap.position.y = mix(capHome.position.y, 1.95, capLift) + arc;
+      cap.position.z = mix(capHome.position.z, -0.7, capLift);
+      cap.rotation.z = capHome.rotation.z - capLift * 1.05;
+      cap.rotation.x = capHome.rotation.x + capLift * 0.32;
+    }
+
+    // --- 2. The ampoule tips over the open mouth --------------------------
+    const ampoule = registry.ampoule;
+    const ampouleHome = ampoule?.userData.homeTransform;
+    if (ampoule && ampouleHome) {
+      const present = pourIn * (1 - pourOut);
+      ampoule.visible = present > 0.01;
+      // Enters from above and to the right, tips to pour, then untips and lifts
+      // away once the stream has stopped.
+      ampoule.position.x = ampouleHome.position.x + (1 - pourIn) * 0.5 + pourOut * 0.45;
+      ampoule.position.y = ampouleHome.position.y + (1 - pourIn) * 0.6 + pourOut * 0.75;
+      ampoule.rotation.z = mix(1.35, ampouleHome.rotation.z, pourIn * (1 - pourOut));
+    }
+
+    // --- 3. The stream, and only while it is actually pouring -------------
+    const stream = registry.pourStream;
+    const streamHome = stream?.userData.homeTransform?.position;
+    if (stream && streamHome) {
+      // Trapezoid envelope: grows in, holds, shrinks out — a stream that snaps
+      // on and off at full length is the tell that it is a prop.
+      const flow = Math.min(1, pourFlow * 5) * Math.min(1, (1 - pourFlow) * 5);
+      stream.visible = flow > 0.02;
+      stream.scale.y = Math.max(0.001, flow);
+      // Scale from the lip downward, not from the middle.
+      stream.position.y = streamHome.y + (1 - flow) * 0.38;
+    }
+
+    // --- 4. The level rises because of the pour ---------------------------
+    // Step 0 already holds the collected sample, so this starts part-full and
+    // clear, and the reagent both raises it and colours it.
     const reagent = registry.reagent;
     const reagentHome = reagent?.userData.homeTransform?.position;
+    const level = 0.42 + fill * 0.58;
+    // Top of the liquid column, in world units — the meniscus and the strip's
+    // dip depth are both measured off this.
+    const surfaceY = -0.975 + level * 1.05;
     if (reagent && reagentHome) {
-      const level = 0.04 + fill * 0.96;
       reagent.scale.y = level;
-      // Cylinder scales about its centre, so drop it by half the lost height
-      // to keep the liquid sitting on the base instead of floating.
+      // The cylinder scales about its centre, so drop it by half the lost
+      // height to keep the liquid sitting on the base instead of floating.
       reagent.position.y = reagentHome.y - (1 - level) * 0.525;
       const mesh = reagent.children[0];
       if (mesh?.material) {
-        mesh.material.color.copy(CLEAR_WATER).lerp(REAGENT_TEAL, fill * 0.85 + react * 0.15);
-        mesh.material.opacity = 1;
+        mesh.material.color
+          .copy(CLEAR_WATER)
+          .lerp(REAGENT_TEAL, clamp01(fill * 0.85 + react * 0.15));
       }
     }
 
-    // --- 2. Meniscus rides the surface ------------------------------------
+    // --- 5. Meniscus rides the surface, and takes the impact --------------
     const meniscus = registry.meniscus;
-    const meniscusHome = meniscus?.userData.homeTransform?.position;
-    if (meniscus && meniscusHome) {
-      meniscus.position.y = meniscusHome.y - (1 - fill) * 1.0;
-      meniscus.visible = fill > 0.03;
-      meniscus.scale.setScalar(0.9 + fill * 0.1);
+    if (meniscus) {
+      meniscus.position.y = surfaceY;
+      meniscus.visible = level > 0.03;
+      // Widens slightly where the stream lands, then settles.
+      const impact = Math.min(1, pourFlow * 5) * Math.min(1, (1 - pourFlow) * 5);
+      meniscus.scale.setScalar(0.94 + level * 0.06 + impact * 0.05);
     }
 
-    // --- 3. Strip dips in, then lifts out and parks by the chart ----------
+    // --- 6. The strip goes in through the mouth, not through the glass ----
     const strip = registry.stripBody?.parent;
-    const stripHome = strip?.userData.stripHome;
     if (strip) {
-      if (!stripHome) {
+      if (!strip.userData.stripHome) {
         strip.userData.stripHome = {
           x: strip.position.x,
           y: strip.position.y,
@@ -342,23 +520,44 @@ function Choreography({ parts, progress }) {
           rz: strip.rotation.z,
         };
       } else {
-        // beside the vial → down into the liquid → up and across to the chart
-        const inX = stripHome.x + 0.62;
-        const inY = stripHome.y - 0.62;
-        const byChartX = stripHome.x + 1.86;
-        const byChartY = stripHome.y + 0.12;
+        const home = strip.userData.stripHome;
 
-        const x = stripHome.x + (inX - stripHome.x) * dip + (byChartX - inX) * lift;
-        const y = stripHome.y + (inY - stripHome.y) * dip + (byChartY - inY) * lift;
+        // Body is 1.7 long, so the tip sits 0.85 below the group origin.
+        // RIM_CLEAR_Y puts that tip at 1.13 — above the rim at 1.00 — which is
+        // the height the strip has to reach before it may travel over the mouth
+        // or back out again. DIP_Y then puts the tip 0.62 under the surface
+        // with the top still clear of the mouth.
+        const RIM_CLEAR_Y = 1.98;
+        const DIP_Y = 0.3;
 
-        strip.position.x = x;
-        strip.position.y = y;
-        strip.position.z = stripHome.z + lift * 0.32;
-        strip.rotation.z = stripHome.rz * (1 - dip * 0.85) - lift * 0.12;
+        // Rise (still beside the vial) -> cross to the centre line -> descend.
+        let y = mix(home.y, RIM_CLEAR_Y, raise);
+        y = mix(y, DIP_Y, down);
+        let x = mix(home.x, 0, across);
+        let z = mix(home.z, 0, across);
+        let rz = home.rz * (1 - raise);
+        let ry = 0;
+
+        if (lift > 0) {
+          // Same rule in reverse: fully out of the mouth before it goes
+          // anywhere near the chart.
+          const up = ease(lift / 0.45);
+          const over = ease((lift - 0.5) / 0.5);
+          y = mix(y, RIM_CLEAR_Y, up);
+          x = mix(x, 1.3, over);
+          y = mix(y, -0.3, over);
+          z = mix(z, 0.2, over);
+          ry = -0.42 * over;
+          rz -= over * 0.1;
+        }
+
+        strip.position.set(x, y, z);
+        strip.rotation.z = rz;
+        strip.rotation.y = ry;
       }
     }
 
-    // --- 4. Indicator pads develop ----------------------------------------
+    // --- 7. Indicator pads develop ----------------------------------------
     const padA = registry.stripPadA?.children[0];
     const padB = registry.stripPadB?.children[0];
     if (padA?.material) {
@@ -371,7 +570,7 @@ function Choreography({ parts, progress }) {
       padB.material.color.copy(PAD_BLANK).lerp(PAD_SAFE, react);
     }
 
-    // --- 5. The matching swatch answers ------------------------------------
+    // --- 8. The matching swatch answers ------------------------------------
     // Index 3 is the alert patch the developed pad lands on.
     for (let i = 0; i < CHART_SWATCHES.length; i += 1) {
       const swatch = registry[`swatch${i}`];
@@ -395,13 +594,28 @@ function ResponsiveRig({ children }) {
   return <group scale={scale}>{children}</group>;
 }
 
-function Scene({ progress, still, reg, parts, assemble, introOffset, choreograph }) {
+function Scene({
+  progress,
+  still,
+  reg,
+  parts,
+  assemble,
+  introOffset,
+  choreograph,
+  loop,
+  gate,
+  showcase,
+  timelineRef,
+}) {
   const group = useRef(null);
 
   useFrame((state, delta) => {
     if (!group.current || still) return;
     const t = Math.min(1, Math.max(0, progress?.current?.value ?? 0));
-    dampE(group.current.rotation, [0, -0.5 + t * 0.9, 0], 0.5, delta);
+    // Halved from the original sweep. With the camera now arcing on a fixed
+    // lens, a large counter-rotation on the kit as well read as two moves
+    // fighting rather than one considered one.
+    dampE(group.current.rotation, [0, -0.28 + t * 0.5, 0], 0.6, delta);
   });
 
   /**
@@ -452,51 +666,52 @@ function Scene({ progress, still, reg, parts, assemble, introOffset, choreograph
       console.warn("[TestKitScene] parts missing from registry:", missing);
     }
 
-    const timeline = gsap.timeline({ delay: 0.15 });
+    /**
+     * Put the walkthrough's parts back to their step-0 pose.
+     *
+     * The rebuild's tweens cover everything in ASSEMBLY, but the walkthrough
+     * also moves the test strip's *parent* group and toggles the ampoule and
+     * the stream, none of which ASSEMBLY knows about. Without this the second
+     * cycle would rebuild the strip inside a group still parked at the colour
+     * chart.
+     */
+    const resetShowcase = () => {
+      if (showcase) showcase.current.value = 0;
+      if (gate) gate.active = false;
+      const strip = registry.stripBody?.parent;
+      const stripHome = strip?.userData.stripHome;
+      if (strip && stripHome) {
+        strip.position.set(stripHome.x, stripHome.y, stripHome.z);
+        strip.rotation.set(0, 0, stripHome.rz);
+      }
+      if (registry.ampoule) registry.ampoule.visible = false;
+      if (registry.pourStream) registry.pourStream.visible = false;
+    };
+
+    const timeline = gsap.timeline({
+      delay: 0.15,
+      repeat: loop ? -1 : 0,
+      repeatDelay: loop ? LOOP_GAP : 0,
+      onRepeat: resetShowcase,
+    });
+    if (timelineRef) timelineRef.current = timeline;
+    if (loop) resetShowcase();
 
     /**
-     * Camera choreography for the build.
+     * Camera for the build: one slow push in, and nothing else.
      *
-     * A single decaying offset was the problem: the camera sat in one place and
-     * merely drifted, so the reconstruction read as parts moving in front of a
-     * static lens. This is a shot sequence instead — four moves, each with its
-     * own ease, cut to what is arriving on screen.
-     *
-     * Offsets are relative to the hero waypoint, and negative z is closer, so
-     * the sequence opens tight and low and finishes at the framing the hero
-     * actually needs. Mutated in place: CameraRig holds a reference to this
-     * exact object, so reassigning it would leave the camera reading a stale
-     * one.
+     * This used to be four cut-together shots with their own eases. On a loop
+     * that plays every few seconds, four moves per cycle is restless — and the
+     * dolly range was doing the same thing the old waypoints did, changing the
+     * subject's size for no narrative reason. A single 3.4s settle from
+     * slightly wider reads as a crane easing onto its mark.
      */
-    introOffset.x = -2.1;
-    introOffset.y = -1.6;
-    introOffset.z = -3.2;
-
-    timeline
-      // 1. Low macro, sweeping right as the vessel builds itself.
-      .to(
-        introOffset,
-        { x: 1.9, y: 0.2, z: -2.4, duration: 1.5, ease: "sine.inOut" },
-        0
-      )
-      // 2. Rise over the mouth as the reagent pours and the cap seats.
-      .to(
-        introOffset,
-        { x: 0.8, y: 1.7, z: -1.1, duration: 1.15, ease: "sine.inOut" },
-        1.5
-      )
-      // 3. Fall back and left as the strip arrives.
-      .to(
-        introOffset,
-        { x: -0.7, y: 0.5, z: 0.9, duration: 1.0, ease: "sine.inOut" },
-        2.65
-      )
-      // 4. Settle onto the hero framing as the chart swatches land.
-      .to(
-        introOffset,
-        { x: 0, y: 0, z: 0, duration: 1.3, ease: "power3.out" },
-        3.65
-      );
+    timeline.fromTo(
+      introOffset,
+      { x: 0.5, y: 0.42, z: 1.55 },
+      { x: 0, y: 0, z: 0, duration: 3.4, ease: "power2.inOut" },
+      0
+    );
 
     ASSEMBLY.forEach(({ key, from, spin, at, swing }) => {
       const node = registry[key];
@@ -508,8 +723,7 @@ function Scene({ progress, still, reg, parts, assemble, introOffset, choreograph
       // effects twice on mount in development: the first pass displaces the
       // piece, the cleanup kills the timeline while it is still displaced, and
       // a second pass that measured "home" from the current position would
-      // treat the displaced point as home and offset again from there. The
-      // piece then animates to the wrong place and the kit never assembles.
+      // treat the displaced point as home and offset again from there.
       if (!node.userData.homeTransform) {
         node.userData.homeTransform = {
           position: node.position.clone(),
@@ -522,24 +736,83 @@ function Scene({ progress, still, reg, parts, assemble, introOffset, choreograph
       }
       const { position: home, rotation: rest } = node.userData.homeTransform;
 
-      node.position.set(home.x + from[0], home.y + from[1], home.z + from[2]);
-      node.rotation.set(rest.x + spin[0], rest.y + spin[1], rest.z + spin[2]);
-      node.scale.setScalar(0.6);
-
+      /**
+       * fromTo, not to — and this is what makes the loop possible at all.
+       *
+       * A `to` tween reads its start value once, when the timeline is built.
+       * On the second cycle the piece is already home, so the tween would run
+       * from home to home and nothing would rebuild. Declaring both ends means
+       * every repeat re-displaces the piece first.
+       *
+       * Three overlapping tweens per piece rather than one: position split per
+       * axis (horizontal on `swing`-scaled expo.out, vertical shorter on
+       * back.out) is what bends the path into an arc; rotation on a long
+       * power4 tail leaves pieces still settling their spin after they arrive.
+       */
       timeline
-        .to(node.position, { x: home.x, duration: 1.5 * swing, ease: "expo.out" }, at)
-        .to(node.position, { z: home.z, duration: 1.35 * swing, ease: "expo.out" }, at + 0.05)
-        .to(node.position, { y: home.y, duration: 1.05, ease: "back.out(1.4)" }, at + 0.18)
-        .to(
+        .fromTo(
+          node.position,
+          { x: home.x + from[0] },
+          { x: home.x, duration: 1.5 * swing, ease: "expo.out" },
+          at
+        )
+        .fromTo(
+          node.position,
+          { z: home.z + from[2] },
+          { z: home.z, duration: 1.35 * swing, ease: "expo.out" },
+          at + 0.05
+        )
+        .fromTo(
+          node.position,
+          { y: home.y + from[1] },
+          { y: home.y, duration: 1.05, ease: "back.out(1.4)" },
+          at + 0.18
+        )
+        .fromTo(
           node.rotation,
+          { x: rest.x + spin[0], y: rest.y + spin[1], z: rest.z + spin[2] },
           { x: rest.x, y: rest.y, z: rest.z, duration: 2.1, ease: "power4.out" },
           at
         )
-        .to(node.scale, { x: 1, y: 1, z: 1, duration: 0.9, ease: "back.out(2.2)" }, at + 0.3);
+        .fromTo(
+          node.scale,
+          { x: 0.6, y: 0.6, z: 0.6 },
+          { x: 1, y: 1, z: 1, duration: 0.9, ease: "back.out(2.2)" },
+          at + 0.3
+        );
     });
+
+    /**
+     * Hand-off: the assembled kit then performs the five steps.
+     *
+     * The gate opens only once the last piece has seated, so the rebuild owns
+     * the parts up to RECON_END and the walkthrough owns them after it. `none`
+     * easing on the sweep is deliberate — each beat inside Choreography is
+     * already smoothstepped by `phase`, and easing the driver as well would
+     * double-ease every one of them.
+     */
+    if (loop && showcase) {
+      timeline.call(
+        () => {
+          if (gate) gate.active = true;
+        },
+        null,
+        RECON_END
+      );
+      timeline.fromTo(
+        showcase.current,
+        { value: 0 },
+        { value: 1, duration: SHOWCASE_DURATION, ease: "none" },
+        RECON_END
+      );
+      // Dead air on the end of the timeline so the finished kit is allowed to
+      // sit there before the cycle restarts.
+      timeline.to({}, { duration: SHOWCASE_HOLD }, RECON_END + SHOWCASE_DURATION);
+    }
 
     return () => {
       timeline.kill();
+      if (timelineRef) timelineRef.current = null;
 
       // Killing a timeline mid-flight leaves every piece wherever it happened
       // to be, so put them back on their seats. Without this, an interrupted
@@ -554,11 +827,14 @@ function Scene({ progress, still, reg, parts, assemble, introOffset, choreograph
         node.scale.setScalar(1);
       });
 
+      resetShowcase();
+      if (gate) gate.active = !loop;
+
       introOffset.x = 0;
       introOffset.y = 0;
       introOffset.z = 0;
     };
-  }, [assemble, still, parts, introOffset]);
+  }, [assemble, still, parts, introOffset, loop, gate, showcase, timelineRef]);
 
   return (
     <>
@@ -592,7 +868,9 @@ function Scene({ progress, still, reg, parts, assemble, introOffset, choreograph
         />
       </ResponsiveRig>
 
-      {choreograph ? <Choreography parts={parts} progress={progress} /> : null}
+      {choreograph || loop ? (
+        <Choreography parts={parts} progress={progress} gate={gate} />
+      ) : null}
 
       <Environment files={suspend(APARTMENT_HDRI).default} />
       <Preload all />
@@ -605,14 +883,43 @@ export default function TestKitScene({
   progress,
   assemble = false,
   choreograph = false,
+  loop = false,
 }) {
-  const still = useMemo(() => {
-    if (typeof window === "undefined") return false;
-    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  /**
+   * Reduced-motion preference, resolved after mount rather than during render.
+   *
+   * Reading matchMedia inside useMemo meant the server rendered `false` and the
+   * client's first render returned the real value — a server/client branch, and
+   * a hydration mismatch for anyone who asks for reduced motion, because Float's
+   * props are derived from it. Starting at `false` keeps both first renders in
+   * agreement; the effect then corrects it, and tracks later changes.
+   */
+  const [still, setStill] = useState(false);
+
+  useEffect(() => {
+    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setStill(query.matches);
+    const onChange = (event) => setStill(event.matches);
+    query.addEventListener("change", onChange);
+    return () => query.removeEventListener("change", onChange);
   }, []);
 
   const parts = useRef({});
   const introOffset = useMemo(() => ({ x: 0, y: 0, z: 0 }), []);
+
+  /**
+   * The hero drives itself. `progress` is the scroll-scrubbed value the
+   * walkthrough section supplies; in loop mode the master timeline owns an
+   * equivalent value instead, and both the camera and the choreography read
+   * whichever one is in charge — so the two modes share every part of the rig
+   * apart from what advances the clock.
+   */
+  const showcase = useRef({ value: 0 });
+  const gate = useMemo(() => ({ active: !loop }), [loop]);
+  const timelineRef = useRef(null);
+  const hostRef = useRef(null);
+  const activeProgress = loop ? showcase : progress;
+
   const reg = useMemo(
     () => (key, node) => {
       if (node) parts.current[key] = node;
@@ -620,9 +927,31 @@ export default function TestKitScene({
     []
   );
 
+  /**
+   * A loop nobody is looking at is wasted battery, and on a laptop it is
+   * audible. Pause the whole timeline when the canvas leaves the viewport.
+   */
+  useEffect(() => {
+    const host = hostRef.current;
+    if (!loop || !host || typeof IntersectionObserver === "undefined") return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        const tl = timelineRef.current;
+        if (!tl) return;
+        if (entry.isIntersecting) tl.resume();
+        else tl.pause();
+      },
+      { threshold: 0.05 }
+    );
+
+    observer.observe(host);
+    return () => observer.disconnect();
+  }, [loop]);
+
 
   return (
-    <div className={className} aria-hidden="true">
+    <div ref={hostRef} className={className} aria-hidden="true">
       <Canvas
         dpr={[1, 2]}
         camera={{ position: WAYPOINTS[0].position, fov: 38 }}
@@ -638,16 +967,20 @@ export default function TestKitScene({
       >
         <Suspense fallback={null}>
           <Scene
-            progress={progress}
+            progress={activeProgress}
             still={still}
             reg={reg}
             parts={parts}
             assemble={assemble}
             introOffset={introOffset}
             choreograph={choreograph}
+            loop={loop}
+            gate={gate}
+            showcase={showcase}
+            timelineRef={timelineRef}
           />
           <CameraRig
-            progress={progress}
+            progress={activeProgress}
             still={still}
             introOffset={introOffset}
           />

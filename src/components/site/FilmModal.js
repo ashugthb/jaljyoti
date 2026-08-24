@@ -2,8 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import CloseIcon from "@mui/icons-material/Close";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import { CloseIcon, PlayIcon } from "@/components/icons";
 
 /**
  * "Watch the film" — the site's one real playable-video moment. Backed by the
@@ -102,7 +101,7 @@ export default function FilmModal({
             aria-label="Close video"
             className="rounded-full p-2 text-white transition-colors hover:bg-white/10"
           >
-            <CloseIcon />
+            <CloseIcon size={22} />
           </button>
         </div>
 
@@ -133,7 +132,7 @@ export default function FilmModal({
         className="group inline-flex items-center gap-3 font-display text-body-md font-bold text-on-surface transition-colors hover:text-primary"
       >
         <span className="flex h-11 w-11 items-center justify-center rounded-full bg-white/80 text-primary shadow-md ring-1 ring-outline-variant/60 transition-transform duration-300 group-hover:scale-105">
-          <PlayArrowIcon sx={{ fontSize: 22 }} />
+          <PlayIcon size={22} />
         </span>
         Watch the film
       </button>

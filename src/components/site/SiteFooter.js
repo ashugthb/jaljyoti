@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import MailOutlineIcon from "@mui/icons-material/MailOutline";
-import PhoneIcon from "@mui/icons-material/Phone";
+import { MailIcon, PhoneIcon } from "@/components/icons";
 import { useGetStarted } from "./GetStarted";
 import { COMPANY, CONTACT } from "./siteMeta";
 
@@ -80,16 +79,16 @@ export default function SiteFooter() {
               <a
                 href={`mailto:${CONTACT.email}`}
                 aria-label={`Email ${COMPANY.name}`}
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-container text-on-surface-variant transition-all hover:bg-primary hover:text-on-primary"
+                className="group flex h-10 w-10 items-center justify-center rounded-full bg-surface-container text-on-surface-variant transition-all hover:bg-primary hover:text-on-primary"
               >
-                <MailOutlineIcon sx={{ fontSize: 18 }} />
+                <MailIcon size={18} />
               </a>
               <a
                 href={`tel:${CONTACT.phone.replace(/\s/g, "")}`}
                 aria-label={`Call ${COMPANY.name}`}
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-container text-on-surface-variant transition-all hover:bg-primary hover:text-on-primary"
+                className="group flex h-10 w-10 items-center justify-center rounded-full bg-surface-container text-on-surface-variant transition-all hover:bg-primary hover:text-on-primary"
               >
-                <PhoneIcon sx={{ fontSize: 18 }} />
+                <PhoneIcon size={18} />
               </a>
             </div>
           </div>

@@ -6,22 +6,27 @@ import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import ArrowRightAltIcon from "@mui/icons-material/ArrowRightAlt";
-import BiotechIcon from "@mui/icons-material/Biotech";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import ColorizeIcon from "@mui/icons-material/Colorize";
-import CrisisAlertIcon from "@mui/icons-material/CrisisAlert";
-import DoneAllIcon from "@mui/icons-material/DoneAll";
-import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
-import FactoryIcon from "@mui/icons-material/Factory";
-import GroupsIcon from "@mui/icons-material/Groups";
-import ScheduleIcon from "@mui/icons-material/Schedule";
-import SchoolIcon from "@mui/icons-material/School";
-import ScienceIcon from "@mui/icons-material/Science";
-import TimerIcon from "@mui/icons-material/Timer";
-import WarningAmberIcon from "@mui/icons-material/WarningAmber";
-import WaterDropIcon from "@mui/icons-material/WaterDrop";
+import {
+  ArrowRightIcon,
+  AwardIcon,
+  BeakerIcon,
+  CheckCircleIcon,
+  CheckIcon,
+  ClockIcon,
+  CrisisAlertIcon,
+  DnaIcon,
+  DoneAllIcon,
+  DropperIcon,
+  FactoryIcon,
+  GroupsIcon,
+  MicroscopeIcon,
+  SchoolIcon,
+  SparkleIcon,
+  TestStripIcon,
+  TimerIcon,
+  WarningIcon,
+  WaterDropIcon,
+} from "@/components/icons";
 import FilmModal from "@/components/site/FilmModal";
 import { useGetStarted } from "@/components/site/GetStarted";
 import LoadReveal from "@/components/site/LoadReveal";
@@ -43,7 +48,7 @@ const TestKitScene = dynamic(() => import("@/components/three/TestKitScene"), {
   ssr: false,
   loading: () => (
     <div
-      className="h-[24rem] w-full sm:h-[30rem] lg:h-[36rem]"
+      className="h-[24rem] w-full sm:h-[28rem] lg:h-[min(34rem,62vh)]"
       aria-hidden="true"
     />
   ),
@@ -96,9 +101,9 @@ const IMAGES = {
 
 /** Three numbers that carry the pitch, shown under the hero call to action. */
 const HERO_FACTS = [
-  { value: "~5 min", label: "Time to a readable result" },
-  { value: "0", label: "Lab instruments needed" },
-  { value: "On-site", label: "Tested where the water is" },
+  { icon: TimerIcon, value: "~5 min", label: "Time to a readable result" },
+  { icon: MicroscopeIcon, value: "0", label: "Lab instruments needed" },
+  { icon: WaterDropIcon, value: "On-site", label: "Tested where the water is" },
 ];
 
 /**
@@ -109,12 +114,12 @@ const HERO_FACTS = [
 const TRUST_MARKERS = [
   { icon: SchoolIcon, label: "IIT Jodhpur", detail: "Research home" },
   {
-    icon: EmojiEventsIcon,
+    icon: AwardIcon,
     label: "NIH Roorkee",
     detail: "First poster award, PSD test",
   },
   {
-    icon: BiotechIcon,
+    icon: DnaIcon,
     label: "CETSD",
     detail: "Emerging tech for sustainability",
   },
@@ -133,7 +138,7 @@ const PROBLEM_STATS = [
     body: "People worldwide lack safely managed drinking water (WHO/UNICEF Joint Monitoring Programme).",
   },
   {
-    icon: ScheduleIcon,
+    icon: ClockIcon,
     tone: "secondary",
     value: "72 hours → 5 minutes",
     body: "Standard lab incubation takes up to three days. The Jaljyoti strip answers at the water source.",
@@ -143,6 +148,7 @@ const PROBLEM_STATS = [
 const TIMELINE = [
   {
     step: "01",
+    icon: DropperIcon,
     title: "Collection",
     aside: "Standard start",
     body: "Traditional: remote samples travel for hours before anyone looks at them. Jaljyoti: test at the source.",
@@ -150,6 +156,7 @@ const TIMELINE = [
   },
   {
     step: "02",
+    icon: DnaIcon,
     title: "Biotech reaction",
     aside: "Jaljyoti advantage",
     body: "Enzymatic biomarkers react with contaminants on the paper strip and produce a visible colour shift.",
@@ -157,6 +164,7 @@ const TIMELINE = [
   },
   {
     step: "03",
+    icon: DoneAllIcon,
     title: "Decision point",
     aside: "Instant output",
     body: "Read the result in about five minutes instead of waiting three days to learn the water was unsafe.",
@@ -164,31 +172,76 @@ const TIMELINE = [
   },
 ];
 
+/**
+ * The walkthrough.
+ *
+ * `detail`, `needs`, `takes` and `mode` exist because a full-height pinned
+ * section carrying a two-word title and one sentence read as empty. Every one
+ * of them is derived from a claim already on this page — the 48-72 hour
+ * incubation and "paper strip, no power" come from COMPARISON, the three
+ * verdicts from the simulator — so the section says more without asserting
+ * anything new about the product.
+ *
+ * `takes` stays qualitative on purpose. The only timing the site actually
+ * commits to is the roughly five-minute reaction; per-step stopwatch figures
+ * would be invented. `span` is the width each step gets on the time track and
+ * is a drawing ratio, not a measurement.
+ */
 const PROCESS_STEPS = [
   {
     icon: WaterDropIcon,
     title: "Collect",
     body: "Take a small sample from any source.",
+    detail:
+      "Well, tap, tank or canal. The test travels to the water, so nothing has to be bottled and shipped anywhere.",
+    needs: "Sample vial",
+    takes: "Seconds",
+    mode: "Hands-on",
+    span: 1,
   },
   {
-    icon: ScienceIcon,
+    icon: BeakerIcon,
     title: "Add reagent",
     body: "Add the enzyme reagent to the sample.",
+    detail:
+      "The enzymatic biomarkers arrive pre-measured — nothing to weigh, dilute or calibrate in the field.",
+    needs: "Reagent ampoule",
+    takes: "Seconds",
+    mode: "Hands-on",
+    span: 1,
   },
   {
-    icon: ColorizeIcon,
+    icon: TestStripIcon,
     title: "Dip",
     body: "Place the paper strip into the solution.",
+    detail:
+      "Paper does the rest. No incubator, no power supply, no laboratory bench.",
+    needs: "Test strip",
+    takes: "Seconds",
+    mode: "Hands-on",
+    span: 1,
   },
   {
     icon: TimerIcon,
     title: "Wait",
     body: "Allow about five minutes for the reaction.",
+    detail:
+      "Nothing to supervise. A laboratory would be starting a 48-72 hour incubation at this point.",
+    needs: "Nothing — set it down",
+    takes: "About 5 minutes",
+    mode: "Unattended",
+    span: 5,
   },
   {
     icon: DoneAllIcon,
     title: "Compare",
     body: "Read the result against the colour chart.",
+    detail:
+      "Safe, boil before use, or contaminated — read by eye, by anyone, with no training.",
+    needs: "Colour chart",
+    takes: "Seconds",
+    mode: "Hands-on",
+    span: 1,
   },
 ];
 
@@ -263,7 +316,7 @@ function readingFor(purity) {
       color: "#eab308",
       cardClass: "border-warning/20 bg-warning/5",
       textClass: "text-warning",
-      icon: WarningAmberIcon,
+      icon: WarningIcon,
       title: "Boil before use",
       description:
         "Low to moderate contamination detected. Water should be filtered or boiled before it is used.",
@@ -289,7 +342,7 @@ function Simulator() {
   const ResultIcon = reading.icon;
 
   return (
-    <section className="py-24 md:py-32">
+    <section className="py-[clamp(3rem,8vh,6rem)]">
       <div className="mx-auto max-w-[1280px] px-margin-mobile md:px-margin-desktop">
         <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-2">
           <Reveal>
@@ -332,8 +385,12 @@ function Simulator() {
                 aria-live="polite"
               >
                 <div className="mb-4 flex items-center gap-4">
+                  {/* `key` remounts the icon whenever the verdict changes, so
+                      the new state draws itself in rather than swapping glyphs. */}
                   <ResultIcon
-                    sx={{ fontSize: 40 }}
+                    key={reading.key}
+                    size={40}
+                    play="always"
                     className={reading.textClass}
                   />
                   <h3
@@ -350,9 +407,11 @@ function Simulator() {
           </Reveal>
 
           <Reveal className="flex items-center justify-center">
-            <div className="jj-panel relative flex aspect-[1/2] w-full max-w-sm flex-col items-center justify-between rounded-[60px] p-8 shadow-2xl">
-              <div className="mb-12 h-4 w-24 rounded-full bg-outline-variant/20" />
-              <div className="relative h-80 w-20 overflow-hidden rounded-full border-8 border-white bg-surface-container shadow-inner">
+            <div className="jj-panel relative flex h-[min(32rem,72vh)] min-h-[22rem] w-full max-w-sm flex-col items-center justify-between rounded-[60px] p-6 shadow-2xl sm:p-8">
+              <div className="h-4 w-24 shrink-0 rounded-full bg-outline-variant/20" />
+              {/* min-h-0 lets this flex child actually shrink — without it the
+                  strip keeps its content height and pushes the caption out. */}
+              <div className="relative my-6 w-20 min-h-0 flex-1 overflow-hidden rounded-full border-8 border-white bg-surface-container shadow-inner">
                 <div
                   className="absolute bottom-0 w-full transition-all duration-700 ease-out"
                   style={{
@@ -362,7 +421,7 @@ function Simulator() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-black/5 via-transparent to-black/5" />
               </div>
-              <div className="mt-12 text-center">
+              <div className="shrink-0 text-center">
                 <div className="mb-2 font-body text-label-md uppercase tracking-widest text-outline">
                   Detection strip
                 </div>
@@ -389,11 +448,12 @@ function ProductMain() {
   const processRef = useRef(null);
 
   /**
-   * Scrub targets for the two 3D views. These are plain objects rather than
-   * state so ScrollTrigger can write to them every frame without re-rendering
-   * React — the r3f frame loop reads the value directly.
+   * Scrub target for the walkthrough. A plain object rather than state so
+   * ScrollTrigger can write to it every frame without re-rendering React — the
+   * r3f frame loop reads the value directly.
    */
-  const heroKitProgress = useRef({ value: 0 });
+  // Only the walkthrough is scroll-scrubbed now; the hero scene runs its own
+  // timeline (see TestKitScene's `loop`).
   const walkProgress = useRef({ value: 0 });
 
   /**
@@ -439,22 +499,6 @@ function ProductMain() {
         });
       });
 
-      // The hero kit drifts a little of the way along its camera path as the
-      // hero scrolls away, so the product is already in motion by the time the
-      // walkthrough takes over.
-      mm.add("(prefers-reduced-motion: no-preference)", () => {
-        gsap.to(heroKitProgress.current, {
-          value: 0.16,
-          ease: "none",
-          scrollTrigger: {
-            trigger: heroRef.current,
-            start: "top top",
-            end: "bottom top",
-            scrub: true,
-          },
-        });
-      });
-
       /**
        * The product walkthrough — the Creality pattern, in live 3D.
        *
@@ -471,6 +515,7 @@ function ProductMain() {
         "(min-width: 768px) and (prefers-reduced-motion: no-preference)",
         () => {
           const steps = gsap.utils.toArray("[data-step]");
+          const tracks = gsap.utils.toArray("[data-step-track]");
           if (!steps.length || !processRef.current) return;
 
           const timeline = gsap.timeline({
@@ -537,6 +582,18 @@ function ProductMain() {
                 enterAt + 0.08
               );
             }
+            // Time-track segment for this step. `fromTo` rather than `to` so
+            // the bar has a defined width at every scrub position, including
+            // when the visitor scrolls back up through the section.
+            if (tracks[index]) {
+              timeline.fromTo(
+                tracks[index],
+                { scaleX: 0 },
+                { scaleX: 1, duration: 0.45, ease: "power2.out" },
+                enterAt
+              );
+            }
+
             if (index < steps.length - 1) {
               timeline.to(
                 step,
@@ -564,7 +621,7 @@ function ProductMain() {
           whole z-range local. */}
       <section
         ref={heroRef}
-        className="relative isolate flex min-h-[92vh] items-center overflow-hidden py-20"
+        className="relative isolate flex min-h-[88vh] items-center overflow-hidden py-16 md:py-20"
       >
         {/* React Bits Aurora — the WebGL base wash, masked so it dissolves
             into the page instead of ending on a hard edge. */}
@@ -632,10 +689,7 @@ function ProductMain() {
                   className="group flex items-center gap-2 rounded-xl bg-primary px-8 py-4 font-display font-bold text-on-primary shadow-lg transition-colors hover:bg-primary-container active:scale-[0.98]"
                 >
                   Request demo
-                  <ArrowForwardIcon
-                    sx={{ fontSize: 20 }}
-                    className="transition-transform group-hover:translate-x-1"
-                  />
+                  <ArrowRightIcon size={20} />
                 </button>
               </Magnetic>
               <a
@@ -656,13 +710,18 @@ function ProductMain() {
               delay={600}
               className="mt-8 grid grid-cols-3 gap-4 border-t border-outline-variant/40 pt-8"
             >
-              {HERO_FACTS.map((fact) => (
-                <div key={fact.label}>
+              {HERO_FACTS.map(({ icon: Icon, value, label }) => (
+                <div key={label} className="group">
+                  <Icon
+                    size={20}
+                    play="view"
+                    className="mb-2 text-primary/60 transition-colors duration-300 group-hover:text-primary"
+                  />
                   <dt className="font-display text-headline-md text-primary">
-                    {fact.value}
+                    {value}
                   </dt>
                   <dd className="font-body text-body-sm text-on-surface-variant">
-                    {fact.label}
+                    {label}
                   </dd>
                 </div>
               ))}
@@ -691,10 +750,14 @@ function ProductMain() {
               delay={220}
               className="relative w-full max-w-lg"
             >
+              {/* Self-driving: rebuilds itself, performs the five steps, holds,
+                  then does it again. It no longer reads the scroll position —
+                  a hero that only moves while you scroll is dead the moment you
+                  stop, which is exactly when someone is actually looking at it. */}
               <TestKitScene
-                className="h-[24rem] w-full sm:h-[30rem] lg:h-[36rem]"
-                progress={heroKitProgress}
+                className="h-[24rem] w-full sm:h-[28rem] lg:h-[min(34rem,62vh)]"
                 assemble
+                loop
               />
 
               {/* Magic UI BorderBeam traces this card's edge — the detail that
@@ -720,7 +783,7 @@ function ProductMain() {
       </section>
 
       {/* Trust markers */}
-      <section className="relative overflow-hidden border-y border-outline-variant/20 bg-surface-container-low py-20">
+      <section className="relative overflow-hidden border-y border-outline-variant/20 bg-surface-container-low py-[clamp(3rem,7vh,5rem)]">
         {/* Soft centred wash + a hairline "light beam" marking the section,
             instead of a flat border — the considered-luxury touch a plain
             row of icons was missing. */}
@@ -750,7 +813,8 @@ function ProductMain() {
                 >
                   <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/10 to-transparent ring-1 ring-primary/10 transition-all duration-500 group-hover:-translate-y-0.5 group-hover:from-primary/20 group-hover:shadow-[0_10px_24px_rgba(0,92,85,0.18)] group-hover:ring-primary/30">
                     <Icon
-                      sx={{ fontSize: 26 }}
+                      size={26}
+                      play="view"
                       className="text-primary/55 transition-colors duration-500 group-hover:text-primary"
                     />
                   </div>
@@ -770,7 +834,7 @@ function ProductMain() {
       </section>
 
       {/* Problem statement */}
-      <section className="overflow-hidden py-24 md:py-32">
+      <section className="overflow-hidden py-[clamp(3.5rem,9vh,8rem)]">
         <div className="mx-auto max-w-[1280px] px-margin-mobile md:px-margin-desktop">
           <div className="grid grid-cols-1 items-center gap-20 lg:grid-cols-2">
             <Reveal>
@@ -790,7 +854,8 @@ function ProductMain() {
                       className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-full transition-transform group-hover:scale-110 ${TONE_CLASSES[tone].ring}`}
                     >
                       <Icon
-                        sx={{ fontSize: 30 }}
+                        size={30}
+                        play="always"
                         className={TONE_CLASSES[tone].text}
                       />
                     </div>
@@ -808,7 +873,7 @@ function ProductMain() {
             </Reveal>
 
             <Reveal className="relative">
-              <div className="relative aspect-square overflow-hidden rounded-[40px] shadow-2xl">
+              <div className="relative aspect-square max-h-[68vh] overflow-hidden rounded-[40px] shadow-2xl">
                 <MediaFrame
                   src={IMAGES.impact.src}
                   alt={IMAGES.impact.alt}
@@ -835,7 +900,7 @@ function ProductMain() {
       </section>
 
       {/* Detection cycle */}
-      <section className="bg-surface-container-highest py-24">
+      <section className="bg-surface-container-highest py-[clamp(3.5rem,9vh,8rem)]">
         <div className="mx-auto mb-20 max-w-[1280px] px-margin-mobile text-center md:px-margin-desktop">
           <Reveal>
             <h2 className="mb-4 font-display text-headline-lg text-on-surface">
@@ -851,7 +916,7 @@ function ProductMain() {
         <Reveal className="relative mx-auto max-w-4xl px-margin-mobile">
           <div className="relative flex flex-col gap-12">
             <div className="absolute top-4 bottom-4 left-[22px] w-1 bg-outline-variant/30" />
-            {TIMELINE.map(({ step, title, aside, body, highlight }) => (
+            {TIMELINE.map(({ step, icon: Icon, title, aside, body, highlight }) => (
               <div
                 key={step}
                 className="relative flex items-center gap-8 md:gap-16"
@@ -866,7 +931,7 @@ function ProductMain() {
                   {step}
                 </div>
                 <div
-                  className={`jj-panel relative flex-1 overflow-hidden rounded-2xl border-l-4 p-6 transition-all ${
+                  className={`jj-panel group relative flex-1 overflow-hidden rounded-2xl border-l-4 p-6 transition-all ${
                     highlight
                       ? "border-l-primary"
                       : "border-l-outline-variant hover:border-l-primary"
@@ -874,10 +939,13 @@ function ProductMain() {
                 >
                   <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                     <h3
-                      className={`font-display text-body-lg font-bold ${
+                      className={`flex items-center gap-2.5 font-display text-body-lg font-bold ${
                         highlight ? "text-primary" : "text-on-surface"
                       }`}
                     >
+                      {/* The advantage step keeps moving on its own; the other
+                          two wake up when the card is hovered. */}
+                      <Icon size={20} play={highlight ? "always" : undefined} />
                       {title}
                     </h3>
                     {highlight ? (
@@ -909,16 +977,32 @@ function ProductMain() {
       <section
         id="how-it-works"
         ref={processRef}
-        className="flex scroll-mt-24 items-center overflow-hidden bg-surface py-24 md:h-screen md:py-12"
+        className="flex scroll-mt-24 items-center overflow-hidden bg-surface py-[clamp(3.5rem,9vh,8rem)] md:h-screen md:py-8"
       >
         <div className="mx-auto w-full max-w-[1280px] px-margin-mobile md:px-margin-desktop">
-          <Reveal className="mb-16 text-center md:mb-6">
-            <h2 className="mb-4 font-display text-headline-lg text-on-surface">
-              Five steps, one visit
-            </h2>
-            <p className="mx-auto max-w-2xl font-body text-body-md text-on-surface-variant">
-              The entire workflow runs where the water is.
-            </p>
+          <Reveal className="mb-12 md:mb-5">
+            <div className="flex flex-col items-center gap-4 text-center md:flex-row md:items-end md:justify-between md:text-left">
+              <div>
+                <h2 className="mb-2 font-display text-headline-lg text-on-surface">
+                  Five steps, one visit
+                </h2>
+                <p className="max-w-2xl font-body text-body-md text-on-surface-variant">
+                  The entire workflow runs where the water is.
+                </p>
+              </div>
+
+              {/* The section's actual argument, stated once up top and then
+                  proved by the time track underneath the walkthrough. */}
+              <div className="flex shrink-0 items-center gap-3 rounded-2xl border border-primary/15 bg-primary/5 px-4 py-3">
+                <ClockIcon size={22} play="view" className="text-primary" />
+                <p className="font-body text-body-sm text-on-surface-variant">
+                  <span className="font-display font-bold text-on-surface">
+                    Under a minute
+                  </span>{" "}
+                  of hands-on work
+                </p>
+              </div>
+            </div>
           </Reveal>
 
           {/* Walkthrough stage. The canvas holds the frame while the copy
@@ -928,7 +1012,7 @@ function ProductMain() {
           <div className="grid grid-cols-1 items-center gap-8 md:grid-cols-[1.1fr_0.9fr]">
             <div className="relative">
               <TestKitScene
-                className="h-[22rem] w-full sm:h-[26rem] md:h-[26rem] lg:h-[30rem]"
+                className="h-[22rem] w-full sm:h-[26rem] md:h-[min(22rem,42vh)] lg:h-[min(26rem,44vh)]"
                 progress={walkProgress}
                 choreograph
               />
@@ -936,7 +1020,11 @@ function ProductMain() {
 
             {/* Desktop: cross-faded panels driven by the pinned timeline. */}
             <div className="relative hidden min-h-[16rem] md:grid">
-              {PROCESS_STEPS.map(({ icon: Icon, title, body }, index) => (
+              {PROCESS_STEPS.map(
+                (
+                  { icon: Icon, title, body, detail, needs, takes, mode },
+                  index
+                ) => (
                 <div
                   key={title}
                   data-step
@@ -966,7 +1054,8 @@ function ProductMain() {
                       className="absolute inset-[3px] flex items-center justify-center rounded-[0.85rem] bg-surface-container-lowest/90 backdrop-blur-sm"
                     >
                       <Icon
-                        sx={{ fontSize: 30 }}
+                        size={30}
+                        play="always"
                         className={STEP_ACCENTS[index].text}
                       />
                     </span>
@@ -991,33 +1080,137 @@ function ProductMain() {
                       {index + 1} / {PROCESS_STEPS.length}
                     </span>
                   </div>
-                  <h3 className="mb-3 font-display text-headline-md text-on-surface">
-                    {title}
-                  </h3>
-                  <p className="max-w-sm font-body text-body-lg text-on-surface-variant">
+
+                  <div className="mb-3 flex flex-wrap items-center gap-3">
+                    <h3 className="font-display text-headline-md text-on-surface">
+                      {title}
+                    </h3>
+                    <span
+                      className={`rounded-full px-2.5 py-1 font-body text-[11px] font-bold uppercase tracking-wider ${
+                        mode === "Unattended"
+                          ? "bg-secondary/10 text-secondary"
+                          : "bg-primary/10 text-primary"
+                      }`}
+                    >
+                      {mode}
+                    </span>
+                  </div>
+
+                  <p className="max-w-md font-body text-body-lg text-on-surface-variant">
                     {body}
                   </p>
+                  <p className="mt-3 max-w-md font-body text-body-sm text-outline">
+                    {detail}
+                  </p>
+
+                  <dl className="mt-6 grid max-w-md grid-cols-2 gap-3">
+                    <div className="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest/70 p-4">
+                      <dt className="mb-1 font-body text-label-md uppercase tracking-widest text-outline">
+                        Takes
+                      </dt>
+                      <dd className="font-display text-body-md font-bold text-on-surface">
+                        {takes}
+                      </dd>
+                    </div>
+                    <div className="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest/70 p-4">
+                      <dt className="mb-1 font-body text-label-md uppercase tracking-widest text-outline">
+                        You need
+                      </dt>
+                      <dd className="font-display text-body-md font-bold text-on-surface">
+                        {needs}
+                      </dd>
+                    </div>
+                  </dl>
                 </div>
-              ))}
+                )
+              )}
             </div>
 
             {/* Mobile: the original stacked list. Pinning five screens of
                 scroll on a phone would trap the viewport, so the walkthrough
                 degrades to the plain sequence it always was. */}
             <ol className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:hidden">
-              {PROCESS_STEPS.map(({ icon: Icon, title, body }) => (
-                <li key={title} className="flex items-start gap-4">
-                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-surface-container-highest text-primary">
-                    <Icon sx={{ fontSize: 26 }} />
+              {PROCESS_STEPS.map(
+                ({ icon: Icon, title, body, detail, needs, takes, mode }) => (
+                  <li
+                    key={title}
+                    className="group flex items-start gap-4 rounded-2xl border border-outline-variant/30 bg-surface-container-lowest/60 p-4"
+                  >
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-surface-container-highest text-primary">
+                      <Icon size={26} play="view" />
+                    </div>
+                    <div>
+                      <div className="mb-1 flex flex-wrap items-center gap-2">
+                        <h3 className="font-display text-body-lg font-bold text-on-surface">
+                          {title}
+                        </h3>
+                        <span
+                          className={`rounded-full px-2 py-0.5 font-body text-[10px] font-bold uppercase tracking-wider ${
+                            mode === "Unattended"
+                              ? "bg-secondary/10 text-secondary"
+                              : "bg-primary/10 text-primary"
+                          }`}
+                        >
+                          {mode}
+                        </span>
+                      </div>
+                      <p className="font-body text-body-sm text-on-surface-variant">
+                        {body}
+                      </p>
+                      <p className="mt-2 font-body text-body-sm text-outline">
+                        {detail}
+                      </p>
+                      <p className="mt-3 font-body text-label-md uppercase tracking-widest text-outline">
+                        {takes} · {needs}
+                      </p>
+                    </div>
+                  </li>
+                )
+              )}
+            </ol>
+          </div>
+
+          {/* Time track. Four narrow segments and one wide one is the whole
+              argument of this section in a single graphic: the work is over in
+              seconds and the wait runs itself. Widths come from `span`, which
+              is a drawing ratio — the only duration the site commits to is the
+              roughly five-minute reaction, so every label stays qualitative.
+              The fill bars are driven by the same pinned timeline as the
+              panels (see the ScrollTrigger block above). */}
+          <div className="mt-6 hidden md:block">
+            <div className="mb-3 flex items-baseline justify-between">
+              <span className="font-body text-label-md uppercase tracking-[0.3em] text-outline">
+                Time on site
+              </span>
+              <span className="font-body text-body-sm text-on-surface-variant">
+                Four steps take seconds. The fifth is a wait nobody has to
+                supervise.
+              </span>
+            </div>
+
+            <ol className="flex items-stretch gap-1.5">
+              {PROCESS_STEPS.map((step, index) => (
+                <li
+                  key={step.title}
+                  style={{ flexGrow: step.span }}
+                  className="min-w-0 basis-0"
+                >
+                  <div className="relative h-1.5 overflow-hidden rounded-full bg-outline-variant/30">
+                    <span
+                      data-step-track
+                      aria-hidden="true"
+                      className="absolute inset-0 origin-left rounded-full"
+                      style={{
+                        background: `linear-gradient(to right, ${STEP_ACCENTS[index].from}, ${STEP_ACCENTS[index].to})`,
+                      }}
+                    />
                   </div>
-                  <div>
-                    <h3 className="mb-1 font-display text-body-lg font-bold text-on-surface">
-                      {title}
-                    </h3>
-                    <p className="font-body text-body-sm text-on-surface-variant">
-                      {body}
-                    </p>
-                  </div>
+                  <p className="mt-2 truncate font-body text-label-md uppercase tracking-wider text-outline">
+                    {step.title}
+                  </p>
+                  <p className="truncate font-body text-body-sm text-on-surface-variant">
+                    {step.takes}
+                  </p>
                 </li>
               ))}
             </ol>
@@ -1026,7 +1219,7 @@ function ProductMain() {
       </section>
 
       {/* Comparison */}
-      <section className="bg-surface-container-low py-24 md:py-32">
+      <section className="bg-surface-container-low py-[clamp(3.5rem,9vh,8rem)]">
         <div className="mx-auto max-w-[1280px] px-margin-mobile md:px-margin-desktop">
           <Reveal className="mb-16 text-center">
             <h2 className="font-display text-headline-lg text-on-surface">
@@ -1082,11 +1275,14 @@ function ProductMain() {
                       {row.traditional}
                     </td>
                     <td
-                      className={`bg-primary/5 px-4 py-6 text-center font-bold text-primary ${
+                      className={`bg-primary/5 px-4 py-6 font-bold text-primary ${
                         index === COMPARISON.length - 1 ? "rounded-b-2xl" : ""
                       }`}
                     >
-                      {row.jaljyoti}
+                      <span className="flex items-center justify-center gap-2">
+                        <CheckIcon size={18} play="view" className="text-primary/70" />
+                        {row.jaljyoti}
+                      </span>
                     </td>
                   </tr>
                 ))}
@@ -1097,7 +1293,7 @@ function ProductMain() {
       </section>
 
       {/* Applications */}
-      <section id="applications" className="scroll-mt-24 py-24 md:py-32">
+      <section id="applications" className="scroll-mt-24 py-[clamp(3.5rem,9vh,8rem)]">
         <div className="mx-auto max-w-[1280px] px-margin-mobile md:px-margin-desktop">
           <Reveal className="mb-16 flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
             <div className="max-w-xl">
@@ -1114,14 +1310,11 @@ function ProductMain() {
               className="group flex items-center gap-2 font-display font-bold text-primary"
             >
               See it in the field
-              <ArrowRightAltIcon
-                sx={{ fontSize: 22 }}
-                className="transition-transform group-hover:translate-x-1"
-              />
+              <ArrowRightIcon size={22} />
             </Link>
           </Reveal>
 
-          <Reveal className="grid grid-cols-1 gap-gutter md:h-[700px] md:grid-cols-6 md:grid-rows-2">
+          <Reveal className="grid grid-cols-1 gap-gutter md:h-[min(42rem,62vh)] md:grid-cols-6 md:grid-rows-2">
             <div className="group relative h-64 overflow-hidden rounded-[32px] md:col-span-3 md:h-auto">
               <MediaFrame
                 src={IMAGES.agriculture.src}
@@ -1165,7 +1358,8 @@ function ProductMain() {
 
             <div className="flex flex-col justify-between gap-8 rounded-[32px] bg-secondary-container p-8 md:col-span-2">
               <FactoryIcon
-                sx={{ fontSize: 40 }}
+                size={40}
+                play="view"
                 className="text-on-secondary-container"
               />
               <div>
@@ -1202,8 +1396,13 @@ function ProductMain() {
       </section>
 
       {/* CTA */}
-      <section className="px-margin-mobile py-24 md:py-32">
+      <section className="px-margin-mobile py-[clamp(3.5rem,9vh,8rem)]">
         <Reveal className="relative mx-auto max-w-4xl overflow-hidden rounded-[48px] bg-primary p-12 text-center text-on-primary md:p-24">
+          <SparkleIcon
+            size={34}
+            play="view"
+            className="mx-auto mb-6 text-primary-fixed"
+          />
           <h2 className="mb-8 font-display text-display-sm md:text-display-lg">
             Ready to improve water safety?
           </h2>
@@ -1215,14 +1414,16 @@ function ProductMain() {
             <button
               type="button"
               onClick={() => openGetStarted("Request a pilot kit")}
-              className="rounded-2xl bg-white px-10 py-5 font-display font-bold text-primary transition-colors hover:bg-on-primary-container active:scale-[0.98]"
+              className="group flex items-center justify-center gap-2 rounded-2xl bg-white px-10 py-5 font-display font-bold text-primary transition-colors hover:bg-on-primary-container active:scale-[0.98]"
             >
               Request a pilot kit
+              <ArrowRightIcon size={20} />
             </button>
             <Link
               href="/team"
-              className="rounded-2xl border border-white/30 px-10 py-5 font-display font-bold text-white transition-colors hover:bg-white/10"
+              className="group flex items-center justify-center gap-2 rounded-2xl border border-white/30 px-10 py-5 font-display font-bold text-white transition-colors hover:bg-white/10"
             >
+              <GroupsIcon size={20} />
               Talk to a scientist
             </Link>
           </div>

@@ -14,6 +14,7 @@
     "@gsap/react": "^2.1.2",
     "@mui/icons-material": "^6.4.7",
     "@mui/material": "^6.4.7",
+    "@mui/material-nextjs": "^6.5.0",
     "@pmndrs/assets": "^1.7.0",
     "@react-three/drei": "^10.7.8",
     "@react-three/fiber": "^9.7.0",

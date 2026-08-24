@@ -10,8 +10,7 @@ import {
   useState,
 } from "react";
 import { toast } from "react-toastify";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import CloseIcon from "@mui/icons-material/Close";
+import { CheckCircleIcon, CloseIcon } from "@/components/icons";
 import { CONTACT } from "./siteMeta";
 
 /**
@@ -234,13 +233,15 @@ function GetStartedDialog({ open, preset, onClose }) {
             aria-label="Close"
             className="rounded-full p-2 text-on-surface-variant transition-colors hover:bg-surface-container"
           >
-            <CloseIcon />
+            <CloseIcon size={22} />
           </button>
         </div>
 
         {status === "sent" ? (
           <div className="flex flex-col items-center gap-4 px-6 py-14 text-center sm:px-8">
-            <CheckCircleIcon sx={{ fontSize: 56 }} className="text-primary" />
+            {/* Plays once on mount — the confirmation draws itself in as the
+                form swaps out. */}
+            <CheckCircleIcon size={56} play="always" className="text-primary" />
             <p className="font-display text-headline-md text-on-surface">
               We&apos;ll be in touch shortly.
             </p>

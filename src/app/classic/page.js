@@ -14,10 +14,12 @@ import Stats from "@/components/Stats";
 import BackToTopButton from "@/components/BackToTopButton";
 
 export default function Home() {
-  // Use noSsr option to avoid mismatches during hydration.
-  const isMobile = useMediaQuery((theme) => theme.breakpoints.down("md"), {
-    noSsr: true,
-  });
+  // `noSsr: true` does the opposite of what the old comment here claimed: it
+  // makes the first client render read the real media query while the server
+  // rendered `defaultMatches` (false), so on any viewport under 900px the two
+  // trees disagree and React discards the whole page. Leaving it off keeps the
+  // first client render matching the server, then the effect corrects it.
+  const isMobile = useMediaQuery((theme) => theme.breakpoints.down("md"));
 
   // Define refs for each section
   const homeRef = useRef(null);
