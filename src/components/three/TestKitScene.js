@@ -20,7 +20,7 @@ import {
 } from "@react-three/drei";
 import { damp3, dampE } from "maath/easing";
 import { suspend } from "suspend-react";
-import { Color, Vector3 } from "three";
+import { Color, DoubleSide, Vector3 } from "three";
 
 /**
  * The Jaljyoti test kit: a scroll-scrubbed camera walkthrough, and a
@@ -102,6 +102,15 @@ const ASSEMBLY = [
  * at 1.9 and its rotation tail runs 2.1 — so 4.2 leaves a beat before the
  * walkthrough takes the parts over.
  */
+/**
+ * Ampoule internals. NOZZLE_TIP_Y is the neck mesh's local origin (0.33) plus
+ * half its height (0.19 / 2) — the point liquid actually leaves the bottle, and
+ * the anchor the stream is built from every frame.
+ */
+const NOZZLE_TIP_Y = 0.425;
+const AMPOULE_FILL_H = 0.46;
+const AMPOULE_FILL_NECK_END = 0.23;
+
 const RECON_END = 4.2;
 const SHOWCASE_DURATION = 9.5;
 const SHOWCASE_HOLD = 1;
@@ -210,38 +219,71 @@ function Vial({ reg }) {
         rotation={[0, 0, 2.4]}
         visible={false}
       >
+        {/* Glass shell. DoubleSide so the far wall is actually drawn — a
+            single-sided transmissive shell has nothing behind the liquid and
+            reads as a flat cut-out rather than a bottle. */}
         <mesh>
           <cylinderGeometry args={[0.13, 0.16, 0.52, 32]} />
           <meshPhysicalMaterial
             color="#dbeeea"
-            roughness={0.14}
-            transmission={0.9}
-            thickness={0.18}
-            ior={1.5}
+            roughness={0.08}
+            transmission={0.94}
+            thickness={0.32}
+            ior={1.46}
             attenuationColor={AQUA}
             attenuationDistance={0.9}
+            side={DoubleSide}
             transparent
           />
         </mesh>
+
+        {/* The reagent itself. Without this the ampoule was an empty shell with
+            a stream coming out of it. Authored full and drained by Choreography
+            as the pour runs; because the bottle is tipped neck-down, what is
+            left pools at the neck end rather than staying centred. */}
+        <group ref={(n) => reg("ampouleFill", n)}>
+          <mesh>
+            <cylinderGeometry args={[0.112, 0.138, AMPOULE_FILL_H, 32]} />
+            <meshPhysicalMaterial
+              color={TEAL_BRIGHT}
+              roughness={0.05}
+              transmission={0.8}
+              thickness={0.42}
+              ior={1.36}
+              attenuationColor={AQUA}
+              attenuationDistance={0.32}
+              transparent
+            />
+          </mesh>
+        </group>
+
         <mesh position={[0, 0.33, 0]}>
           <cylinderGeometry args={[0.052, 0.088, 0.19, 24]} />
           <meshStandardMaterial color={TEAL} roughness={0.42} metalness={0.1} />
         </mesh>
       </group>
 
-      {/* Stream: spans y 0.82 -> 1.58, i.e. from the ampoule's lip down through
-          the mouth. Scaled from its top edge so it reads as falling liquid. */}
-      <group ref={(n) => reg("pourStream", n)} position={[0.12, 1.2, 0]} visible={false}>
+      {/*
+        Stream. Authored one unit long and scaled on Y, because its length is
+        not a constant: it is whatever the distance happens to be between the
+        nozzle tip and the liquid surface on that frame, and both ends move.
+        Choreography places it; nothing here is positioned by hand.
+
+        Tapered narrow-end-down — a falling stream accelerates and thins. The
+        previous geometry widened downward, which reads as a pour running
+        upward.
+      */}
+      <group ref={(n) => reg("pourStream", n)} visible={false}>
         <mesh>
-          <cylinderGeometry args={[0.045, 0.075, 0.76, 24, 1, true]} />
+          <cylinderGeometry args={[0.042, 0.026, 1, 24]} />
           <meshPhysicalMaterial
             color={TEAL_BRIGHT}
-            roughness={0.08}
-            transmission={0.86}
-            thickness={0.25}
+            roughness={0.05}
+            transmission={0.84}
+            thickness={0.3}
             ior={1.333}
             attenuationColor={AQUA}
-            attenuationDistance={0.5}
+            attenuationDistance={0.45}
             transparent
           />
         </mesh>
@@ -378,6 +420,9 @@ const ease = (v) => {
   return t * t * (3 - 2 * t);
 };
 
+/** Scratch for the per-frame nozzle solve — never allocate inside useFrame. */
+const nozzle = new Vector3();
+
 const CLEAR_WATER = new Color("#e8f6f3");
 const REAGENT_TEAL = new Color(TEAL_BRIGHT);
 const PAD_BLANK = new Color("#eceade");
@@ -464,17 +509,16 @@ function Choreography({ parts, progress, gate }) {
       ampoule.rotation.z = mix(1.35, ampouleHome.rotation.z, pourIn * (1 - pourOut));
     }
 
-    // --- 3. The stream, and only while it is actually pouring -------------
-    const stream = registry.pourStream;
-    const streamHome = stream?.userData.homeTransform?.position;
-    if (stream && streamHome) {
-      // Trapezoid envelope: grows in, holds, shrinks out — a stream that snaps
-      // on and off at full length is the tell that it is a prop.
-      const flow = Math.min(1, pourFlow * 5) * Math.min(1, (1 - pourFlow) * 5);
-      stream.visible = flow > 0.02;
-      stream.scale.y = Math.max(0.001, flow);
-      // Scale from the lip downward, not from the middle.
-      stream.position.y = streamHome.y + (1 - flow) * 0.38;
+    // --- 3. The reagent inside it drains -----------------------------------
+    // The bottle is tipped neck-down, so the remaining liquid pools at the neck
+    // end: the column shortens from the base, it does not shrink about its
+    // centre. Anchoring the neck end and scaling away from it is what sells it.
+    const ampouleFill = registry.ampouleFill;
+    if (ampouleFill) {
+      const remaining = Math.max(0.08, 1 - pourFlow * 0.86);
+      ampouleFill.scale.y = remaining;
+      ampouleFill.position.y =
+        AMPOULE_FILL_NECK_END - (remaining * AMPOULE_FILL_H) / 2;
     }
 
     // --- 4. The level rises because of the pour ---------------------------
@@ -483,8 +527,8 @@ function Choreography({ parts, progress, gate }) {
     const reagent = registry.reagent;
     const reagentHome = reagent?.userData.homeTransform?.position;
     const level = 0.42 + fill * 0.58;
-    // Top of the liquid column, in world units — the meniscus and the strip's
-    // dip depth are both measured off this.
+    // Top of the liquid column, in world units — the meniscus, the strip's dip
+    // depth and the stream's landing point are all measured off this.
     const surfaceY = -0.975 + level * 1.05;
     if (reagent && reagentHome) {
       reagent.scale.y = level;
@@ -496,6 +540,44 @@ function Choreography({ parts, progress, gate }) {
         mesh.material.color
           .copy(CLEAR_WATER)
           .lerp(REAGENT_TEAL, clamp01(fill * 0.85 + react * 0.15));
+      }
+    }
+
+    /**
+     * The stream, solved from the nozzle rather than authored.
+     *
+     * It used to be a fixed cylinder parked near the bottle, which left a
+     * visible gap between the lip and the liquid — and because the ampoule
+     * moves and tips throughout the pour while the stream did not, that gap
+     * changed every frame.
+     *
+     * The nozzle tip is a fixed point in the ampoule's own space, so rotating
+     * it by the ampoule's current rotation and adding its position gives the
+     * tip in the parent's space — which is the space the stream lives in too,
+     * so no world-matrix round trip is needed. The stream then spans from that
+     * point straight down to the liquid surface: liquid leaves the lip along
+     * the neck's axis but is vertical almost immediately under gravity.
+     */
+    const stream = registry.pourStream;
+    if (stream && ampoule) {
+      nozzle
+        .set(0, NOZZLE_TIP_Y, 0)
+        .applyEuler(ampoule.rotation)
+        .add(ampoule.position);
+
+      // Leading edge falls from the lip to the surface; trailing edge detaches
+      // from the lip when the pour stops, so the last of it falls away instead
+      // of the whole column vanishing at once.
+      const lead = clamp01(pourFlow * 5);
+      const trail = clamp01((1 - pourFlow) * 5);
+      const topEdge = mix(surfaceY, nozzle.y, trail);
+      const bottomEdge = mix(nozzle.y, surfaceY, lead);
+      const length = topEdge - bottomEdge;
+
+      stream.visible = ampoule.visible && length > 0.01;
+      if (stream.visible) {
+        stream.position.set(nozzle.x, (topEdge + bottomEdge) / 2, nozzle.z);
+        stream.scale.set(1, length, 1);
       }
     }
 
@@ -686,6 +768,12 @@ function Scene({
       }
       if (registry.ampoule) registry.ampoule.visible = false;
       if (registry.pourStream) registry.pourStream.visible = false;
+      // Refill it. Without this the second cycle pours from an empty bottle.
+      const fill = registry.ampouleFill;
+      if (fill) {
+        fill.scale.y = 1;
+        fill.position.y = AMPOULE_FILL_NECK_END - AMPOULE_FILL_H / 2;
+      }
     };
 
     const timeline = gsap.timeline({
