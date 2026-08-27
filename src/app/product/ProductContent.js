@@ -66,33 +66,42 @@ const TestKitScene = dynamic(() => import("@/components/three/TestKitScene"), {
  */
 const IMAGES = {
   hero: {
-    src: "/bg-1.webp",
+    src: "/hero-bg.webp",
     alt: "Macro illustration of glowing microorganisms in water, evoking biological contamination at a cellular scale",
     label: "Product kit hero",
     hint: "Studio shot of the Jaljyoti kit — vial, reagent, strip, colour chart. 4:5 portrait, ~1200×1500.",
   },
   impact: {
-    src: "/img7.jpg",
-    alt: "The Jaljyoti team demonstrating the paper-strip test at a research exhibition",
-    label: "Field demonstration",
-    hint: "Square crop of a real demonstration or deployment, ~1200×1200.",
-    objectPosition: "center 30%",
+    // Source file is public/img8.JPG.jpeg at 6720x4480 / 7.3MB — far too heavy to
+    // ship. This is the same photograph resized to 1800px wide at ~386KB.
+    //
+    // TODO(jaljyoti): the certificate in this photo names a specific award,
+    // track and prize amount. The caption in the markup stays deliberately
+    // general until someone confirms the exact wording — same rule the
+    // COMPARISON table follows.
+    src: "/award.webp",
+    alt: "The Jaljyoti team receiving an innovation challenge award certificate",
+    label: "Award presentation",
+    hint: "Portrait or square crop of the award presentation, ~1400x1750.",
+    objectPosition: "center 42%",
   },
   agriculture: {
-    src: "/bg4.webp",
+    src: "/agriculture.webp",
     alt: "Irrigation watering a field of young crops",
     label: "Agriculture",
     hint: "Landscape, ~1600×900.",
   },
   community: {
-    src: "/img9.jpg",
-    alt: "Students and residents testing water with the Jaljyoti kit in a village",
+    // Portrait source (576x1280), so it gets the bento's tall cell rather than
+    // being cropped to a letterbox — which is what made it look mangled.
+    src: "/community.webp",
+    alt: "Residents testing water with the Jaljyoti kit in a village",
     label: "Schools & communities",
-    hint: "Landscape crop of a school or community deployment, ~1600×900.",
-    objectPosition: "center 25%",
+    hint: "Portrait deployment shot, ~1000x1750.",
+    objectPosition: "center 38%",
   },
   municipal: {
-    src: "/bg3.webp",
+    src: "/municipal.webp",
     alt: "Clean treated water flowing from a supply outlet",
     label: "Municipal supply",
     hint: "Landscape shot of a treatment plant or municipal supply point, ~2000×900.",
@@ -130,45 +139,94 @@ const TRUST_MARKERS = [
   },
 ];
 
+/**
+ * The three numbers that carry the problem.
+ *
+ * Every figure here is already published elsewhere on this page — the WHO/UNICEF
+ * count, the 48-72 hour lab turnaround from COMPARISON, and the "0 lab
+ * instruments" from HERO_FACTS. Nothing new is asserted.
+ *
+ * `count`/`suffix` exist so the value can be counted up on scroll rather than
+ * simply appearing; `pair` is the after-state for the two that are really a
+ * before/after, drawn as a second, much shorter bar.
+ */
 const PROBLEM_STATS = [
   {
     icon: CrisisAlertIcon,
-    tone: "error",
-    value: "2.2 Billion",
-    body: "People worldwide lack safely managed drinking water (WHO/UNICEF Joint Monitoring Programme).",
+    accent: { from: "#ef4444", to: "#fca5a5", text: "text-error", ring: "ring-error/20" },
+    count: 2.2,
+    decimals: 1,
+    suffix: "B",
+    headline: "people",
+    label: "still live without safely managed drinking water.",
+    source: "WHO / UNICEF Joint Monitoring Programme",
+    bar: 0.28,
+    barNote: "of the world",
   },
   {
     icon: ClockIcon,
-    tone: "secondary",
-    value: "72 hours → 5 minutes",
-    body: "Standard lab incubation takes up to three days. The Jaljyoti strip answers at the water source.",
+    accent: { from: "#006398", to: "#5bb8fe", text: "text-secondary", ring: "ring-secondary/20" },
+    count: 72,
+    decimals: 0,
+    suffix: "h",
+    headline: "of incubation",
+    label: "collapses to about five minutes, read at the water source.",
+    source: "Versus standard laboratory turnaround",
+    bar: 1,
+    pair: 0.06,
+    barNote: "lab vs Jaljyoti",
+  },
+  {
+    icon: MicroscopeIcon,
+    accent: { from: "#005c55", to: "#80d5cb", text: "text-primary", ring: "ring-primary/20" },
+    count: 0,
+    decimals: 0,
+    suffix: "",
+    headline: "instruments",
+    label: "needed to read a result — no incubator, no bench, no power.",
+    source: "Paper strip and reagent only",
+    bar: 0.02,
+    barNote: "equipment required",
   },
 ];
 
-const TIMELINE = [
+/**
+ * The detection cycle as a straight comparison.
+ *
+ * Earlier passes drew this as a track with markers, hatched dead time and step
+ * chips — three visual systems competing inside one card, which read as busy
+ * rather than considered. The comparison only needs two things: the two
+ * durations set against each other, and what actually happens in each. A single
+ * rule under each number carries the proportion; nothing else has to.
+ */
+const ROUTES = [
   {
-    step: "01",
-    icon: DropperIcon,
-    title: "Collection",
-    aside: "Standard start",
-    body: "Traditional: remote samples travel for hours before anyone looks at them. Jaljyoti: test at the source.",
-    highlight: false,
+    key: "lab",
+    label: "Conventional laboratory",
+    value: "48-72",
+    unit: "hours",
+    weight: 100,
+    steps: [
+      "Collect and bottle the sample",
+      "Transport it to a laboratory",
+      "Incubate for two to three days",
+      "Report returned",
+    ],
+    verdict: "The water was drunk days before the answer arrived.",
   },
   {
-    step: "02",
-    icon: DnaIcon,
-    title: "Biotech reaction",
-    aside: "Jaljyoti advantage",
-    body: "Enzymatic biomarkers react with contaminants on the paper strip and produce a visible colour shift.",
-    highlight: true,
-  },
-  {
-    step: "03",
-    icon: DoneAllIcon,
-    title: "Decision point",
-    aside: "Instant output",
-    body: "Read the result in about five minutes instead of waiting three days to learn the water was unsafe.",
-    highlight: false,
+    key: "jaljyoti",
+    label: "With Jaljyoti",
+    approx: true,
+    value: "5",
+    unit: "minutes",
+    weight: 6,
+    steps: [
+      "Collect at the source",
+      "Dip the paper strip",
+      "Read the colour against the chart",
+    ],
+    verdict: "Answered before you leave the tap.",
   },
 ];
 
@@ -290,11 +348,6 @@ const COMPARISON = [
   },
 ];
 
-const TONE_CLASSES = {
-  error: { ring: "bg-error/10", text: "text-error" },
-  secondary: { ring: "bg-secondary/10", text: "text-secondary" },
-};
-
 /** Illustrative reading used by the simulator — not a measurement. */
 function readingFor(purity) {
   if (purity > 80) {
@@ -334,6 +387,46 @@ function readingFor(purity) {
       "Dangerous levels of pathogens present. Do not consume. Immediate sanitation measures required.",
     label: "Danger",
   };
+}
+
+/**
+ * Counts a number up when it scrolls into view.
+ *
+ * Magic UI ships a `number-ticker` for this, but it is built on `motion` — and
+ * this project already runs GSAP as its single animation authority, with
+ * ScrollTrigger imported two lines up. Reaching for a second runtime to move one
+ * integer would be the wrong trade.
+ *
+ * The final value is rendered on the server and only overwritten once the
+ * animation starts, so the figure is present for crawlers and for anyone with
+ * reduced motion.
+ */
+function StatCounter({ value, decimals = 0, suffix = "" }) {
+  const ref = useRef(null);
+
+  useGSAP(
+    () => {
+      const el = ref.current;
+      if (!el) return;
+      const mm = gsap.matchMedia();
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        const state = { n: 0 };
+        gsap.to(state, {
+          n: value,
+          duration: 1.6,
+          ease: "power2.out",
+          scrollTrigger: { trigger: el, start: "top 85%", once: true },
+          onUpdate: () => {
+            el.textContent = state.n.toFixed(decimals) + suffix;
+          },
+        });
+      });
+      return () => mm.revert();
+    },
+    { scope: ref }
+  );
+
+  return <span ref={ref}>{value.toFixed(decimals) + suffix}</span>;
 }
 
 function Simulator() {
@@ -654,7 +747,7 @@ function ProductMain() {
               as="span"
               variant="pop"
               delay={0}
-              className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-white/70 px-4 py-1.5 font-body text-label-md uppercase tracking-widest text-primary"
+              className="mb-[clamp(0.75rem,2vh,1.5rem)] inline-flex items-center gap-2 rounded-full border border-primary/15 bg-white/70 px-4 py-1.5 font-body text-label-md uppercase tracking-widest text-primary"
             >
               <span className="jj-pulse-dot" aria-hidden="true" />
               Next-gen water testing
@@ -664,7 +757,7 @@ function ProductMain() {
               as="h1"
               variant="wipe"
               delay={100}
-              className="mb-6 font-display text-display-sm leading-[1.1] text-on-surface md:text-display-lg"
+              className="mb-[clamp(0.75rem,2vh,1.5rem)] font-display text-display-sm leading-[1.1] text-on-surface md:text-display-lg"
             >
               Know if water is <span className="italic text-primary">safe</span>{" "}
               within just <span className="text-secondary">5 minutes.</span>
@@ -674,7 +767,7 @@ function ProductMain() {
               as="p"
               variant="blur"
               delay={260}
-              className="mb-10 max-w-xl font-body text-body-lg text-on-surface-variant"
+              className="mb-[clamp(1.25rem,3.2vh,2.5rem)] max-w-xl font-body text-body-lg text-on-surface-variant"
             >
               A smart paper-based test built at IIT Jodhpur. No labs, no
               transport delays, no compromises — precision biotechnology in the
@@ -700,7 +793,7 @@ function ProductMain() {
               </a>
             </LoadReveal>
 
-            <LoadReveal as="div" variant="blur" delay={480} className="mt-8">
+            <LoadReveal as="div" variant="blur" delay={480} className="mt-[clamp(1rem,2.4vh,2rem)]">
               <FilmModal />
             </LoadReveal>
 
@@ -708,7 +801,7 @@ function ProductMain() {
               as="dl"
               variant="blur"
               delay={600}
-              className="mt-8 grid grid-cols-3 gap-4 border-t border-outline-variant/40 pt-8"
+              className="mt-[clamp(1rem,2.4vh,2rem)] grid grid-cols-3 gap-4 border-t border-outline-variant/40 pt-[clamp(1rem,2.4vh,2rem)]"
             >
               {HERO_FACTS.map(({ icon: Icon, value, label }) => (
                 <div key={label} className="group">
@@ -834,63 +927,192 @@ function ProductMain() {
       </section>
 
       {/* Problem statement */}
-      <section className="overflow-hidden py-[clamp(3.5rem,9vh,8rem)]">
-        <div className="mx-auto max-w-[1280px] px-margin-mobile md:px-margin-desktop">
-          <div className="grid grid-cols-1 items-center gap-20 lg:grid-cols-2">
+      <section className="relative overflow-hidden py-[clamp(2.5rem,6vh,5.5rem)]">
+        {/* Depth. A flat white panel is what made this section read as a
+            wireframe; two soft washes and the shared grain give it a surface. */}
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(58%_50%_at_6%_0%,rgba(186,26,26,0.07),transparent_62%),radial-gradient(55%_48%_at_96%_100%,rgba(0,92,85,0.08),transparent_62%)]" />
+        <div className="jj-grain" />
+
+        <div className="relative mx-auto max-w-[1280px] px-margin-mobile md:px-margin-desktop">
+          <div className="grid grid-cols-1 items-center gap-[clamp(2rem,4vh,3.5rem)] lg:grid-cols-[1.05fr_0.95fr] lg:gap-[clamp(2.5rem,4vw,5rem)]">
             <Reveal>
-              <h2 className="mb-8 font-display text-headline-lg text-on-surface">
+              <span className="mb-[clamp(0.6rem,1.8vh,1.25rem)] inline-flex items-center gap-2.5 rounded-full border border-error/15 bg-error/5 px-4 py-1.5 font-body text-label-md uppercase tracking-[0.25em] text-error">
+                <span className="jj-dot-error" aria-hidden="true" />
+                The problem
+              </span>
+
+              <h2 className="mb-[clamp(0.6rem,1.6vh,1rem)] font-display text-headline-lg text-on-surface">
                 Water safety is a race{" "}
                 <span className="text-error">against time.</span>
               </h2>
-              <p className="mb-12 font-body text-body-lg text-on-surface-variant">
-                Traditional water testing is broken. By the time a sample
-                reaches a lab and gets processed, contaminated water has already
-                been consumed. We change the timeline from days to minutes.
+              <p className="mb-[clamp(1rem,2.6vh,1.75rem)] max-w-xl font-body text-body-md text-on-surface-variant">
+                By the time a sample reaches a lab and gets processed,
+                contaminated water has already been consumed. We change the
+                timeline from days to minutes.
               </p>
-              <div className="space-y-8">
-                {PROBLEM_STATS.map(({ icon: Icon, tone, value, body }) => (
-                  <div key={value} className="group flex items-start gap-6">
-                    <div
-                      className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-full transition-transform group-hover:scale-110 ${TONE_CLASSES[tone].ring}`}
+
+              <ul className="space-y-[clamp(0.5rem,1.4vh,0.85rem)]">
+                {PROBLEM_STATS.map(
+                  ({
+                    icon: Icon,
+                    accent,
+                    count,
+                    decimals,
+                    suffix,
+                    headline,
+                    label,
+                    source,
+                    bar,
+                    pair,
+                    barNote,
+                  }) => (
+                    <li
+                      key={source}
+                      className="jj-stat group relative overflow-hidden rounded-3xl border border-outline-variant/40 bg-surface-container-lowest/80 p-[clamp(0.7rem,1.9vh,1.15rem)] transition-all duration-500 hover:-translate-y-1 hover:border-transparent hover:shadow-[0_18px_44px_rgba(15,23,42,0.12)]"
                     >
-                      <Icon
-                        size={30}
-                        play="always"
-                        className={TONE_CLASSES[tone].text}
+                      {/* Accent wash + a hairline that draws across the top. */}
+                      <span
+                        aria-hidden="true"
+                        className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+                        style={{
+                          background: `linear-gradient(120deg, ${accent.from}14, transparent 55%)`,
+                        }}
                       />
-                    </div>
-                    <div>
-                      <h3 className="font-display text-headline-md text-on-surface">
-                        {value}
-                      </h3>
-                      <p className="font-body text-body-md text-on-surface-variant">
-                        {body}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                      <span
+                        aria-hidden="true"
+                        className="absolute inset-x-0 top-0 h-px origin-left scale-x-0 transition-transform duration-700 group-hover:scale-x-100"
+                        style={{
+                          background: `linear-gradient(to right, transparent, ${accent.from}, transparent)`,
+                        }}
+                      />
+
+                      <div className="relative flex items-start gap-4">
+                        {/* Icon tile — conic halo behind a glass chip, the same
+                            language as the walkthrough steps. */}
+                        <span className="relative h-[clamp(2.4rem,5.2vh,3rem)] w-[clamp(2.4rem,5.2vh,3rem)] shrink-0">
+                          <span
+                            aria-hidden="true"
+                            className="absolute -inset-0.5 rounded-[1.15rem] opacity-55 blur-[5px] transition-opacity duration-500 group-hover:opacity-90"
+                            style={{
+                              background: `conic-gradient(from 0deg, ${accent.from}, ${accent.to}, ${accent.from})`,
+                            }}
+                          />
+                          <span
+                            aria-hidden="true"
+                            className="absolute inset-0 rounded-2xl"
+                            style={{
+                              background: `linear-gradient(140deg, ${accent.from}, ${accent.to})`,
+                            }}
+                          />
+                          <span className="absolute inset-[2.5px] flex items-center justify-center rounded-[0.8rem] bg-surface-container-lowest">
+                            <Icon size={21} play="always" className={accent.text} />
+                          </span>
+                        </span>
+
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-baseline gap-x-2.5">
+                            <span
+                              className={`font-display text-[clamp(1.45rem,3.4vh,1.85rem)] leading-none font-extrabold tracking-tight tabular-nums ${accent.text}`}
+                            >
+                              <StatCounter
+                                value={count}
+                                decimals={decimals}
+                                suffix={suffix}
+                              />
+                            </span>
+                            <span className="font-display text-body-lg font-bold text-on-surface">
+                              {headline}
+                            </span>
+                          </div>
+
+                          <p className="mt-1.5 font-body text-body-sm text-on-surface-variant">
+                            {label}{" "}
+                            <span className="text-outline/70">— {source}</span>
+                          </p>
+
+                          {/* Magnitude bar. Where a stat is really a before/after,
+                              `pair` draws the after-state over it — the length
+                              difference makes the point faster than the words do. */}
+                          <div className="mt-[clamp(0.45rem,1.3vh,0.75rem)] flex items-center gap-3">
+                            <span className="relative h-1.5 flex-1 overflow-hidden rounded-full bg-outline-variant/25">
+                              <span
+                                aria-hidden="true"
+                                className="jj-stat-bar absolute inset-y-0 left-0 rounded-full"
+                                style={{
+                                  width: `${bar * 100}%`,
+                                  background:
+                                    pair !== undefined
+                                      ? "rgba(110,121,119,0.35)"
+                                      : `linear-gradient(to right, ${accent.from}, ${accent.to})`,
+                                }}
+                              />
+                              {pair !== undefined ? (
+                                <span
+                                  aria-hidden="true"
+                                  className="jj-stat-bar absolute inset-y-0 left-0 rounded-full shadow-[0_0_0_1px_rgba(255,255,255,0.9)]"
+                                  style={{
+                                    width: `${pair * 100}%`,
+                                    background: `linear-gradient(to right, ${accent.from}, ${accent.to})`,
+                                    transitionDelay: "0.6s",
+                                  }}
+                                />
+                              ) : null}
+                            </span>
+                            <span className="shrink-0 font-body text-[11px] uppercase tracking-widest text-outline">
+                              {barNote}
+                            </span>
+                          </div>
+
+                        </div>
+                      </div>
+                    </li>
+                  )
+                )}
+              </ul>
             </Reveal>
 
+            {/* Credential image. Framed rather than dropped in: corner brackets,
+                a glass award chip and a caption that sits on the photograph. */}
             <Reveal className="relative">
-              <div className="relative aspect-square max-h-[68vh] overflow-hidden rounded-[40px] shadow-2xl">
+              <span
+                aria-hidden="true"
+                className="absolute -top-3 -left-3 h-20 w-20 rounded-tl-[30px] border-t-2 border-l-2 border-primary/25"
+              />
+              <span
+                aria-hidden="true"
+                className="absolute -right-3 -bottom-3 h-20 w-20 rounded-br-[30px] border-r-2 border-b-2 border-primary/25"
+              />
+
+              <div className="jj-frame group relative aspect-[4/5] max-h-[min(58vh,30rem)] w-full overflow-hidden rounded-[34px] shadow-[0_30px_70px_rgba(15,23,42,0.20)] ring-1 ring-white/50 sm:aspect-[5/4] lg:aspect-[4/5]">
                 <MediaFrame
                   src={IMAGES.impact.src}
                   alt={IMAGES.impact.alt}
                   label={IMAGES.impact.label}
                   hint={IMAGES.impact.hint}
                   objectPosition={IMAGES.impact.objectPosition}
-                  sizes="(max-width: 1024px) 100vw, 600px"
+                  sizes="(max-width: 1024px) 100vw, 620px"
+                  imageClassName="transition-transform duration-[1.4s] ease-out group-hover:scale-[1.04]"
                   className="h-full w-full"
                 />
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-primary/40 to-transparent" />
-                <div className="jj-glass absolute right-8 bottom-8 left-8 rounded-2xl p-6">
-                  <p className="mb-2 font-body text-label-md uppercase tracking-widest text-primary">
-                    Impact highlight
+
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0a1020]/82 via-[#0a1020]/12 to-transparent" />
+                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(70%_50%_at_50%_0%,rgba(255,212,121,0.16),transparent_60%)]" />
+
+                <div className="absolute top-5 left-5 flex items-center gap-2.5 rounded-full border border-white/25 bg-white/15 px-4 py-2 backdrop-blur-md">
+                  <AwardIcon size={18} play="always" className="text-[#ffd479]" />
+                  <span className="font-body text-label-md uppercase tracking-widest text-white">
+                    Recognised work
+                  </span>
+                </div>
+
+                <div className="absolute right-5 bottom-5 left-5 rounded-2xl border border-white/15 bg-white/10 p-5 backdrop-blur-xl">
+                  <p className="mb-1.5 flex items-center gap-2 font-body text-label-md uppercase tracking-widest text-primary-fixed">
+                    <SparkleIcon size={14} play="always" />
+                    National innovation challenge
                   </p>
-                  <p className="font-display text-body-lg font-bold text-on-surface">
-                    Taken out of the lab and into the field — demonstrated to
-                    researchers, officials, and rural households.
+                  <p className="font-display text-body-lg font-bold leading-snug text-white">
+                    An award presented to the Jaljyoti team for the paper-strip
+                    test — taken out of the lab and into the field.
                   </p>
                 </div>
               </div>
@@ -899,73 +1121,118 @@ function ProductMain() {
         </div>
       </section>
 
-      {/* Detection cycle */}
-      <section className="bg-surface-container-highest py-[clamp(3.5rem,9vh,8rem)]">
-        <div className="mx-auto mb-20 max-w-[1280px] px-margin-mobile text-center md:px-margin-desktop">
-          <Reveal>
-            <h2 className="mb-4 font-display text-headline-lg text-on-surface">
-              Redefining the detection cycle
-            </h2>
-            <p className="mx-auto max-w-2xl font-body text-body-md text-on-surface-variant">
-              Jaljyoti collapses the traditional laboratory workflow into a
-              single, seamless interaction.
-            </p>
-          </Reveal>
-        </div>
+      {/* Detection cycle — one comparison, two columns, nothing else.
+          Sized entirely in clamp/vh so it compresses rather than overflows. */}
+      <section className="relative overflow-hidden bg-surface-container-low py-[clamp(2.25rem,6vh,5.5rem)]">
+        {/* One soft wash. The grid and grain that used to sit here were noise
+            behind content that is already dense enough. */}
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_55%_at_50%_0%,rgba(0,92,85,0.07),transparent_65%)]" />
 
-        <Reveal className="relative mx-auto max-w-4xl px-margin-mobile">
-          <div className="relative flex flex-col gap-12">
-            <div className="absolute top-4 bottom-4 left-[22px] w-1 bg-outline-variant/30" />
-            {TIMELINE.map(({ step, icon: Icon, title, aside, body, highlight }) => (
-              <div
-                key={step}
-                className="relative flex items-center gap-8 md:gap-16"
-              >
-                <div
-                  className={`z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full font-display font-bold ${
-                    highlight
-                      ? "animate-pulse bg-primary text-on-primary shadow-[0_0_20px_rgba(0,106,99,0.4)]"
-                      : "bg-outline-variant text-on-surface"
-                  }`}
-                >
-                  {step}
-                </div>
-                <div
-                  className={`jj-panel group relative flex-1 overflow-hidden rounded-2xl border-l-4 p-6 transition-all ${
-                    highlight
-                      ? "border-l-primary"
-                      : "border-l-outline-variant hover:border-l-primary"
-                  }`}
-                >
-                  <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                    <h3
-                      className={`flex items-center gap-2.5 font-display text-body-lg font-bold ${
-                        highlight ? "text-primary" : "text-on-surface"
+        <div className="relative mx-auto max-w-[1080px] px-margin-mobile md:px-margin-desktop">
+          <Reveal className="mb-[clamp(1.5rem,4vh,3rem)] text-center">
+            <span className="mb-3 inline-block font-body text-label-md uppercase tracking-[0.3em] text-outline">
+              The detection cycle
+            </span>
+            <h2 className="font-display text-headline-lg text-on-surface">
+              Two routes to the same answer
+            </h2>
+          </Reveal>
+
+          <Reveal>
+            <div className="grid grid-cols-1 gap-[clamp(1.5rem,4vh,2.5rem)] md:grid-cols-2 md:gap-0">
+              {ROUTES.map((route, index) => {
+                const brand = route.key === "jaljyoti";
+                return (
+                  <div
+                    key={route.key}
+                    className={`relative flex flex-col ${
+                      index === 1
+                        ? "md:border-l md:border-outline-variant/50 md:pl-[clamp(1.75rem,4vw,3.5rem)]"
+                        : "md:pr-[clamp(1.75rem,4vw,3.5rem)]"
+                    }`}
+                  >
+                    <p
+                      className={`mb-[clamp(0.75rem,2.2vh,1.5rem)] font-body text-label-md uppercase tracking-[0.25em] ${
+                        brand ? "text-primary" : "text-outline"
                       }`}
                     >
-                      {/* The advantage step keeps moving on its own; the other
-                          two wake up when the card is hovered. */}
-                      <Icon size={20} play={highlight ? "always" : undefined} />
-                      {title}
-                    </h3>
-                    {highlight ? (
-                      <span className="rounded-full bg-primary/10 px-3 py-1 font-body text-[11px] font-bold text-primary">
-                        {aside}
+                      {route.label}
+                    </p>
+
+                    {/* The hook: the two durations, set at the same size. */}
+                    <p className="flex items-baseline gap-2.5">
+                      {route.approx ? (
+                        <span
+                          aria-hidden="true"
+                          className="font-display text-[clamp(1.2rem,3vh,1.7rem)] leading-none font-semibold text-primary/45"
+                        >
+                          ~
+                        </span>
+                      ) : null}
+                      <span
+                        className={`font-display text-[clamp(2.6rem,7vh,4rem)] leading-none font-extrabold tracking-[-0.03em] tabular-nums ${
+                          brand ? "text-primary" : "text-outline/70"
+                        }`}
+                      >
+                        <span className="sr-only">{route.approx ? "about " : ""}</span>
+                        {route.value}
                       </span>
-                    ) : (
-                      <span className="font-body text-body-sm italic text-outline">
-                        {aside}
+                      <span
+                        className={`font-display text-body-lg font-bold ${
+                          brand ? "text-on-surface" : "text-outline"
+                        }`}
+                      >
+                        {route.unit}
                       </span>
-                    )}
+                    </p>
+
+                    {/* One hairline carries the proportion. */}
+                    <span
+                      aria-hidden="true"
+                      className="mt-[clamp(0.6rem,1.8vh,1.1rem)] mb-[clamp(0.9rem,2.6vh,1.75rem)] block h-0.5 max-w-[22rem] overflow-hidden rounded-full bg-outline-variant/30"
+                    >
+                      <span
+                        className={`jj-lane block h-full rounded-full ${
+                          brand ? "bg-primary" : "bg-outline/45"
+                        }`}
+                        style={{ width: `${route.weight}%` }}
+                      />
+                    </span>
+
+                    <ol className="space-y-[clamp(0.4rem,1.3vh,0.7rem)]">
+                      {route.steps.map((step, i) => (
+                        <li key={step} className="flex items-baseline gap-3">
+                          <span
+                            className={`font-body text-[11px] tabular-nums ${
+                              brand ? "text-primary/70" : "text-outline/60"
+                            }`}
+                          >
+                            {String(i + 1).padStart(2, "0")}
+                          </span>
+                          <span
+                            className={`font-body text-body-sm ${
+                              brand ? "text-on-surface" : "text-outline"
+                            }`}
+                          >
+                            {step}
+                          </span>
+                        </li>
+                      ))}
+                    </ol>
+
+                    <p
+                      className={`mt-auto pt-[clamp(0.9rem,2.6vh,1.75rem)] font-display text-body-md font-bold ${
+                        brand ? "text-primary" : "text-outline/80"
+                      }`}
+                    >
+                      {route.verdict}
+                    </p>
                   </div>
-                  <p className="font-body text-body-sm text-on-surface-variant">
-                    {body}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </Reveal>
+                );
+              })}
+            </div>
+          </Reveal>
+        </div>
       </section>
 
       <Simulator />
@@ -1315,7 +1582,7 @@ function ProductMain() {
           </Reveal>
 
           <Reveal className="grid grid-cols-1 gap-gutter md:h-[min(42rem,62vh)] md:grid-cols-6 md:grid-rows-2">
-            <div className="group relative h-64 overflow-hidden rounded-[32px] md:col-span-3 md:h-auto">
+            <div className="group relative h-64 overflow-hidden rounded-[32px] md:col-span-4 md:h-auto">
               <MediaFrame
                 src={IMAGES.agriculture.src}
                 alt={IMAGES.agriculture.alt}
@@ -1335,18 +1602,18 @@ function ProductMain() {
               </div>
             </div>
 
-            <div className="group relative h-64 overflow-hidden rounded-[32px] md:col-span-3 md:h-auto">
+            <div className="group relative h-72 overflow-hidden rounded-[32px] md:order-first md:col-span-2 md:row-span-2 md:h-auto">
               <MediaFrame
                 src={IMAGES.community.src}
                 alt={IMAGES.community.alt}
                 label={IMAGES.community.label}
                 hint={IMAGES.community.hint}
                 objectPosition={IMAGES.community.objectPosition}
-                sizes="(max-width: 768px) 100vw, 50vw"
+                sizes="(max-width: 768px) 100vw, 33vw"
                 className="h-full w-full"
                 imageClassName="transition-transform duration-700 group-hover:scale-105"
               />
-              <div className="pointer-events-none absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/80 via-black/25 to-transparent p-8">
+              <div className="pointer-events-none absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/85 via-black/30 to-transparent p-8">
                 <h3 className="font-display text-headline-md text-white">
                   Schools & communities
                 </h3>
@@ -1356,38 +1623,46 @@ function ProductMain() {
               </div>
             </div>
 
-            <div className="flex flex-col justify-between gap-8 rounded-[32px] bg-secondary-container p-8 md:col-span-2">
+            <div className="group relative flex flex-col justify-between gap-8 overflow-hidden rounded-[32px] bg-[linear-gradient(150deg,#00413c,#005c55_45%,#0f766e)] p-8 md:col-span-2">
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 opacity-[0.14] [background-image:linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)] [background-size:26px_26px]"
+              />
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute -top-14 -right-14 h-44 w-44 rounded-full bg-[radial-gradient(closest-side,rgba(155,242,232,0.4),transparent)]"
+              />
               <FactoryIcon
                 size={40}
-                play="view"
-                className="text-on-secondary-container"
+                play="always"
+                className="relative text-primary-fixed"
               />
-              <div>
-                <h3 className="mb-2 font-display text-headline-md text-on-secondary-container">
+              <div className="relative">
+                <h3 className="mb-2 font-display text-headline-md text-white">
                   Industrial use
                 </h3>
-                <p className="font-body text-body-sm text-on-secondary-container/80">
+                <p className="font-body text-body-sm text-white/75">
                   Process-water monitoring without pausing the line.
                 </p>
               </div>
             </div>
 
-            <div className="group relative h-64 overflow-hidden rounded-[32px] md:col-span-4 md:h-auto">
+            <div className="group relative h-64 overflow-hidden rounded-[32px] md:col-span-2 md:h-auto">
               <MediaFrame
                 src={IMAGES.municipal.src}
                 alt={IMAGES.municipal.alt}
                 label={IMAGES.municipal.label}
                 hint={IMAGES.municipal.hint}
-                sizes="(max-width: 768px) 100vw, 66vw"
+                sizes="(max-width: 768px) 100vw, 33vw"
                 className="h-full w-full"
                 imageClassName="transition-transform duration-700 group-hover:scale-105"
               />
               <div className="pointer-events-none absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/80 via-black/25 to-transparent p-8">
                 <h3 className="font-display text-headline-md text-white">
-                  Municipal & government supply
+                  Municipal supply
                 </h3>
                 <p className="font-body text-body-sm text-white/80">
-                  Spot-check distribution points across a whole district.
+                  Spot-check government distribution points across a district.
                 </p>
               </div>
             </div>

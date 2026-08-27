@@ -18,7 +18,7 @@ export default function Hero({ isMobile }) {
         <Box
             sx={{
                 position: 'relative',
-                backgroundImage: 'url(/bg-1.webp)',
+                backgroundImage: 'url(/hero-bg.webp)',
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 py: isMobile ? 8 : 20,

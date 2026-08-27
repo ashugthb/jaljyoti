@@ -10,13 +10,13 @@ export default function GallerySlider() {
 
     // Updated array of image objects with captions and an optional portrait flag.
     const images = [
-        { src: '/img1.jpg', caption: 'Received the First Poster Award at NIH Roorkee for the PSD Test.' },
-        { src: '/img2.jpg', caption: 'Director of NIH Roorkee', isPortrait: true },
-        { src: '/img3.jpg', caption: 'Sharmilla Oswal Millet Woman of India' },
-        { src: '/img4.jpg', caption: 'Presenting the kit to an audience.' },
-        { src: '/img5.jpg', caption: 'Shwoing test in THRIVE exhibition' },
-        { src: '/img7.jpg', caption: 'Demonstrating test to the prof. M. Jagadesh Kumar (Former chairman of UGC) ' },
-        { src: '/img8.jpg', caption: 'Kit presentaion in rural area ' }
+        { src: '/gallery-img1.webp', caption: 'Received the First Poster Award at NIH Roorkee for the PSD Test.' },
+        { src: '/gallery-img2.webp', caption: 'Director of NIH Roorkee', isPortrait: true },
+        { src: '/gallery-img3.webp', caption: 'Sharmilla Oswal Millet Woman of India' },
+        { src: '/gallery-img4.webp', caption: 'Presenting the kit to an audience.' },
+        { src: '/gallery-img5.webp', caption: 'Shwoing test in THRIVE exhibition' },
+        { src: '/gallery-img7.webp', caption: 'Demonstrating test to the prof. M. Jagadesh Kumar (Former chairman of UGC) ' },
+        { src: '/gallery-img8.webp', caption: 'Kit presentaion in rural area ' }
     ];
 
     const [currentIndex, setCurrentIndex] = useState(0);

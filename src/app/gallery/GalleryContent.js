@@ -27,24 +27,24 @@ import SiteShell from "@/components/site/SiteShell";
  */
 const PHOTOS = [
   {
-    src: "/img1.jpg",
-    width: 3065,
-    height: 4096,
+    src: "/gallery-img1.webp",
+    width: 2000,
+    height: 2673,
     category: "recognition",
     title: "First Poster Award, NIH Roorkee",
     caption:
       "The team receiving the First Poster Award at NIH Roorkee for the PSD test.",
   },
   {
-    src: "/img4.jpg",
-    width: 4096,
-    height: 3065,
+    src: "/gallery-img4.webp",
+    width: 2000,
+    height: 1497,
     category: "exhibitions",
     title: "Presenting the kit",
     caption: "Presenting the Jaljyoti kit and its workflow to an audience.",
   },
   {
-    src: "/img7.jpg",
+    src: "/gallery-img7.webp",
     width: 960,
     height: 1280,
     category: "recognition",
@@ -53,7 +53,7 @@ const PHOTOS = [
       "Demonstrating the test to Prof. M. Jagadesh Kumar, former Chairman of the UGC.",
   },
   {
-    src: "/img2.jpg",
+    src: "/gallery-img2.webp",
     width: 1884,
     height: 2356,
     category: "recognition",
@@ -61,7 +61,7 @@ const PHOTOS = [
     caption: "Meeting the Director of the National Institute of Hydrology, Roorkee.",
   },
   {
-    src: "/img5.jpg",
+    src: "/gallery-img5.webp",
     width: 960,
     height: 1280,
     category: "exhibitions",
@@ -69,15 +69,15 @@ const PHOTOS = [
     caption: "Showing the test in action at the THRIVE exhibition.",
   },
   {
-    src: "/img3.jpg",
-    width: 3060,
-    height: 4080,
+    src: "/gallery-img3.webp",
+    width: 2000,
+    height: 2667,
     category: "recognition",
     title: "With Sharmilla Oswal",
     caption: "With Sharmilla Oswal, the Millet Woman of India.",
   },
   {
-    src: "/img6.jpg",
+    src: "/gallery-img6.webp",
     width: 960,
     height: 1280,
     category: "exhibitions",
@@ -85,7 +85,7 @@ const PHOTOS = [
     caption: "Walking visitors through a live test at the exhibition stall.",
   },
   {
-    src: "/img8.jpg",
+    src: "/gallery-img8.webp",
     width: 715,
     height: 1600,
     category: "field",
@@ -94,7 +94,7 @@ const PHOTOS = [
       "Presenting the kit to residents in a rural area, where lab access is hardest.",
   },
   {
-    src: "/img9.jpg",
+    src: "/gallery-img9.webp",
     width: 576,
     height: 1280,
     category: "field",
@@ -150,7 +150,7 @@ function Lightbox({ photo, index, total, onClose, onPrev, onNext }) {
       className="fixed inset-0 z-[90] flex flex-col bg-inverse-surface/95 backdrop-blur-sm"
       style={{ animation: "jj-fade-in 0.25s ease both" }}
     >
-      <div className="flex items-center justify-between px-margin-mobile py-5 md:px-margin-desktop">
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-center justify-between bg-gradient-to-b from-black/55 to-transparent px-margin-mobile py-5 md:px-margin-desktop [&>*]:pointer-events-auto">
         <span className="font-body text-label-md uppercase tracking-widest text-inverse-on-surface/70">
           {CATEGORY_LABEL[photo.category]} · {index + 1} / {total}
         </span>
@@ -165,7 +165,7 @@ function Lightbox({ photo, index, total, onClose, onPrev, onNext }) {
         </button>
       </div>
 
-      <div className="relative flex min-h-0 flex-1 items-center justify-center px-4 pb-4">
+      <div className="relative flex min-h-0 flex-1 items-center justify-center px-4 py-4">
         <button
           type="button"
           onClick={onPrev}
@@ -175,23 +175,43 @@ function Lightbox({ photo, index, total, onClose, onPrev, onNext }) {
           <ChevronLeftIcon size={20} />
         </button>
 
+        {/* The figure owns the available box; the image fills whatever is left
+            after the caption. A fixed `max-h-[68vh]` was capping every photo at
+            68% of the viewport height regardless of shape — which left a
+            portrait shot rendering 221px wide inside a 1440px overlay, with the
+            entire width of the screen unused. Constraining on both axes and
+            letting object-contain resolve it means a portrait uses the height
+            and a landscape uses the width. */}
         <figure
           key={photo.src}
-          className="jj-fade-up flex h-full max-w-5xl flex-col items-center justify-center gap-5"
+          className="jj-fade-up relative flex h-full w-full items-center justify-center"
         >
-          <div className="relative flex min-h-0 flex-1 items-center">
+          {/*
+            max-h/max-w only ever *constrain* an <img> — they never make one
+            grow. With h-auto/w-auto the element rendered at whatever intrinsic
+            size Next happened to serve, which for a portrait was 201x450 inside
+            a 1440px overlay.
+
+            Filling the box and letting object-contain letterbox the picture is
+            the only form that is correct for every aspect ratio. The catch is
+            that the element is then larger than the visible photo on one axis,
+            so a box-shadow would float away from its edges — drop-shadow is
+            applied to the rendered pixels instead, so it hugs the photo whatever
+            shape it is.
+          */}
+          <div className="relative mx-auto flex h-full w-full max-w-6xl items-center justify-center">
             <Image
               src={photo.src}
               alt={photo.caption}
               width={photo.width}
               height={photo.height}
               sizes="(max-width: 768px) 92vw, 70vw"
-              className="max-h-[68vh] w-auto rounded-2xl object-contain shadow-2xl"
+              className="h-full w-full object-contain [filter:drop-shadow(0_18px_45px_rgba(0,0,0,0.55))]"
             />
           </div>
-          <figcaption className="max-w-2xl text-center">
+          <figcaption className="pointer-events-none absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-black/70 via-black/35 to-transparent px-6 pt-16 pb-6 text-center">
             <p className="font-display text-headline-md text-white">{photo.title}</p>
-            <p className="mt-2 font-body text-body-md text-inverse-on-surface/75">
+            <p className="mx-auto mt-1.5 max-w-2xl font-body text-body-md text-inverse-on-surface/80">
               {photo.caption}
             </p>
           </figcaption>

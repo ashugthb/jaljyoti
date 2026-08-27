@@ -12,13 +12,13 @@ export default function WaterUsage() {
                 "Current water quality is suitable for drinking after standard treatment. Boil water for 3 minutes to ensure safety."
         },
         {
-            image: '/bg3.webp',
+            image: '/municipal.webp',
             title: "Bathing & Hygiene",
             description:
                 "Safe for bathing and personal hygiene. Avoid ingestion and keep away from open wounds or cuts."
         },
         {
-            image: '/bg4.webp',
+            image: '/agriculture.webp',
             title: "Agricultural Use",
             description:
                 "Suitable for irrigation of non-edible plants. Not recommended for leafy vegetables without treatment."

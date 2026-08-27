@@ -262,6 +262,64 @@ body {
     animation: jj-fade-up 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   }
 
+  /* Error-toned sibling of .jj-pulse-dot, for the problem section eyebrow */
+  .jj-dot-error {
+    width: 0.4rem;
+    height: 0.4rem;
+    border-radius: 9999px;
+    background-color: var(--color-error);
+    box-shadow: 0 0 0 0 rgba(186, 26, 26, 0.5);
+    animation: jj-pulse-ring-error 2.4s ease-out infinite;
+  }
+
+  /* Magnitude bars grow from the left once their card is revealed, so the
+     length comparison is something you watch happen rather than arrive at. */
+  .jj-stat-bar {
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 1.1s cubic-bezier(0.16, 1, 0.3, 1) 0.25s;
+  }
+
+  [data-revealed="true"] .jj-stat-bar {
+    transform: scaleX(1);
+  }
+
+  /* Route lanes grow from the left when the section is revealed, so the
+     length difference is watched rather than simply present. */
+  .jj-lane {
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 1.3s cubic-bezier(0.16, 1, 0.3, 1) 0.15s;
+  }
+
+  [data-revealed="true"] .jj-lane {
+    transform: scaleX(1);
+  }
+
+  /* Slow sheen across the framed credential image on hover */
+  .jj-frame::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    opacity: 0;
+    background: linear-gradient(
+      115deg,
+      transparent 35%,
+      rgba(255, 255, 255, 0.22) 50%,
+      transparent 65%
+    );
+    background-size: 250% 100%;
+    background-position: 120% 0;
+    transition: opacity 0.4s ease;
+  }
+
+  .jj-frame:hover::after {
+    opacity: 1;
+    animation: jj-sheen 1.5s ease-out;
+  }
+
   /* Live indicator in the hero eyebrow */
   .jj-pulse-dot {
     width: 0.4rem;
@@ -644,6 +702,27 @@ body {
   }
 }
 
+@keyframes jj-pulse-ring-error {
+  0% {
+    box-shadow: 0 0 0 0 rgba(186, 26, 26, 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 0.5rem rgba(186, 26, 26, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(186, 26, 26, 0);
+  }
+}
+
+@keyframes jj-sheen {
+  from {
+    background-position: 120% 0;
+  }
+  to {
+    background-position: -40% 0;
+  }
+}
+
 @keyframes jj-spin {
   to {
     transform: rotate(360deg);
@@ -768,6 +847,24 @@ body {
   }
 
   .jj-pulse-dot {
+    animation: none !important;
+  }
+
+  .jj-dot-error {
+    animation: none !important;
+  }
+
+  .jj-stat-bar {
+    transform: scaleX(1);
+    transition: none !important;
+  }
+
+  .jj-lane {
+    transform: scaleX(1);
+    transition: none !important;
+  }
+
+  .jj-frame::after {
     animation: none !important;
   }
 

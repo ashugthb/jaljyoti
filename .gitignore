@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Full-resolution originals. Optimised WebP in public/ is generated from these
+# by scripts/optimise-images.mjs — these must never ship in the build.
+source-images/
